@@ -6,10 +6,100 @@ namespace Npgsql.EFCore.Tracker.Core.Extensions;
 
 public static class DbContextExtensions
 {
+    public static async Task<bool> EnableTableTracking(this DbContext dbContext, string tableName, CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
+        ArgumentException.ThrowIfNullOrEmpty(tableName, nameof(tableName));
+
+        var database = dbContext.Database;
+        var connection = database.GetDbConnection();
+
+        await using var command = connection.CreateCommand();
+
+        await connection.OpenAsync(token);
+        try
+        {
+            command.CommandText = "SELECT enable_table_tracking(@table_name);";
+
+            var parameter = command.CreateParameter();
+            parameter.ParameterName = "@table_name";
+            parameter.Value = tableName;
+            parameter.DbType = DbType.String;
+            command.Parameters.Add(parameter);
+
+            var result = (bool?)await command.ExecuteScalarAsync(token);
+            return result ?? false;
+        }
+        finally
+        {
+            await connection.CloseAsync();
+        }
+    }
+
+    public static async Task<bool> DisableTableTracking(this DbContext dbContext, string tableName, CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
+        ArgumentException.ThrowIfNullOrEmpty(tableName, nameof(tableName));
+
+        var database = dbContext.Database;
+        var connection = database.GetDbConnection();
+
+        await using var command = connection.CreateCommand();
+
+        await connection.OpenAsync(token);
+        try
+        {
+            command.CommandText = "SELECT disable_table_tracking(@table_name);";
+
+            var parameter = command.CreateParameter();
+            parameter.ParameterName = "@table_name";
+            parameter.Value = tableName;
+            parameter.DbType = DbType.String;
+            command.Parameters.Add(parameter);
+
+            var result = (bool?)await command.ExecuteScalarAsync(token);
+            return result ?? false;
+        }
+        finally
+        {
+            await connection.CloseAsync();
+        }
+    }
+
+    public static async Task<bool> IsTableTracked(this DbContext dbContext, string tableName, CancellationToken token)
+    {
+        ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
+        ArgumentException.ThrowIfNullOrEmpty(tableName, nameof(tableName));
+
+        var database = dbContext.Database;
+        var connection = database.GetDbConnection();
+
+        await using var command = connection.CreateCommand();
+
+        await connection.OpenAsync(token);
+        try
+        {
+            command.CommandText = "SELECT is_table_tracked(@table_name);";
+
+            var parameter = command.CreateParameter();
+            parameter.ParameterName = "@table_name";
+            parameter.Value = tableName;
+            parameter.DbType = DbType.String;
+            command.Parameters.Add(parameter);
+
+            var result = (bool?)await command.ExecuteScalarAsync(token);
+            return result ?? false;
+        }
+        finally
+        {
+            await connection.CloseAsync();
+        }
+    }
+
     public static async Task<string?> GetLastTimestamp(this DbContext dbContext, string tableName, CancellationToken token)
     {
-        if (string.IsNullOrWhiteSpace(tableName))
-            throw new ArgumentException("Table name cannot be null or empty", nameof(tableName));
+        ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
+        ArgumentException.ThrowIfNullOrEmpty(tableName, nameof(tableName));
 
         var database = dbContext.Database;
         var connection = database.GetDbConnection();
