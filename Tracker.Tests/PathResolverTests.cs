@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Npgsql.EFCore.Tracker.AspNet.Services;
-using Npgsql.EFCore.Tracker.AspNet.Services.Contracts;
+using Tracker.AspNet.Services;
+using Tracker.AspNet.Services.Contracts;
 
 namespace Tracker.Tests;
 
