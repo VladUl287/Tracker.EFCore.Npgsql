@@ -1,12 +1,15 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Npgsql.EFCore.Tracker.AspNet.Logging;
 using Npgsql.EFCore.Tracker.AspNet.Services.Contracts;
 using System.Runtime.CompilerServices;
 
 namespace Npgsql.EFCore.Tracker.AspNet.Middlewares;
 
 public sealed class TrackMiddleware<TContext>(
-    RequestDelegate next, IETagService etagService, IActionsRegistry actionsRegistry, IPathResolver pathResolver) where TContext : DbContext
+    RequestDelegate next, IETagService etagService, IActionsRegistry actionsRegistry, IPathResolver pathResolver,
+    ILogger<TrackMiddleware<TContext>> logger) where TContext : DbContext
 {
     public async Task InvokeAsync(HttpContext context)
     {
@@ -14,10 +17,12 @@ public sealed class TrackMiddleware<TContext>(
         {
             var path = pathResolver.ResolvePath(context);
             var descriptor = actionsRegistry.GetActionDescriptor(path);
+            var token = context.RequestAborted;
 
-            var cancellationToken = context.RequestAborted;
-            if (await etagService.ValidateAndSetETagAsync(context, descriptor, cancellationToken))
+            if (descriptor is not null && await etagService.SetETagAsync(context, descriptor, token))
                 return;
+            else if (descriptor is null)
+                logger.LogDescriptorNotFound();
         }
 
         await next(context);

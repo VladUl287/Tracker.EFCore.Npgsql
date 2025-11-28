@@ -12,14 +12,8 @@ namespace Npgsql.EFCore.Tracker.AspNet.Services;
 public class ETagService<TContext>(
     IETagGenerator etagGenerator, ILogger<ETagService<TContext>> logger) : IETagService where TContext : DbContext
 {
-    public async ValueTask<bool> ValidateAndSetETagAsync(HttpContext context, ActionDescriptor descriptor, CancellationToken token = default)
+    public async ValueTask<bool> SetETagAsync(HttpContext context, ActionDescriptor descriptor, CancellationToken token = default)
     {
-        if (descriptor is null)
-        {
-            logger.LogDescriptorNotFound();
-            return false;
-        }
-
         if (context.Response.Headers.ContainsKey("ETag"))
         {
             logger.LogETagAlreadyExists();

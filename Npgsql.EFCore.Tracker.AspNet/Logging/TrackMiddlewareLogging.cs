@@ -4,7 +4,7 @@ namespace Npgsql.EFCore.Tracker.AspNet.Logging;
 
 public static partial class TrackMiddlewareLogger
 {
-    [LoggerMessage(Level = LogLevel.Warning, Message = "Action descriptor not found for the current request path")]
+    [LoggerMessage(Level = LogLevel.Information, Message = "Action descriptor not found for the current request path")]
     public static partial void LogDescriptorNotFound(this ILogger logger);
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "ETag header already exists in response")]
