@@ -30,51 +30,59 @@ public class DefaultActionsDescriptorProvider<TContext>(
                 var route = routeEndpoint.RoutePattern.RawText ?? controllerTracking.Route ??
                     throw new NullReferenceException($"Route for '{routeEndpoint.DisplayName}' not found.");
 
-                var tables = new HashSet<string>();
-                foreach (var table in controllerTracking.Tables ?? [])
-                {
-                    var added = tables.Add(table);
-                    if (!added)
-                    {
-                        //log warning
-                    }
-                }
-
-                var contextModel = context.Model;
-                foreach (var entity in controllerTracking.Entities ?? [])
-                {
-                    var entityType = contextModel.FindEntityType(entity) ??
-                        throw new NullReferenceException($"Table entity type not found for type {entity.FullName}");
-
-                    var tableName = entityType.GetSchemaQualifiedTableName() ??
-                        throw new NullReferenceException($"Table entity type not found for type {entity.FullName}");
-
-                    var added = tables.Add(tableName);
-                    if (!added)
-                    {
-                        //log warning
-                    }
-                }
-
+                string[] tables = ResolveTables(controllerTracking.Tables, controllerTracking.Entities);
                 yield return new ActionDescriptor
                 {
                     Route = route,
-                    Tables = tables.ToArray()
+                    Tables = tables
                 };
             }
 
-            var minimalApiTracking = routeEndpoint.Metadata.GetMetadata<TrackRouteMetadata>();
-            if (minimalApiTracking is not null && routeEndpoint is { RoutePattern.RawText: not null })
+            var trackRouteMetadata = routeEndpoint.Metadata.GetMetadata<TrackRouteMetadata>();
+            if (trackRouteMetadata is not null && routeEndpoint is { RoutePattern.RawText: not null })
             {
-                var route = routeEndpoint.RoutePattern.RawText ?? minimalApiTracking.Route ??
+                var route = routeEndpoint.RoutePattern.RawText ?? trackRouteMetadata.Route ??
                     throw new NullReferenceException($"Route for '{routeEndpoint.DisplayName}' not found.");
 
+                string[] tables = ResolveTables(trackRouteMetadata.Tables, trackRouteMetadata.Entities);
                 yield return new ActionDescriptor
                 {
                     Route = route,
-                    Tables = minimalApiTracking.Tables ?? []
+                    Tables = tables
                 };
             }
         }
+    }
+
+    private string[] ResolveTables(string[]? tables, Type[]? entities)
+    {
+        var result = new HashSet<string>();
+
+        foreach (var table in tables ?? [])
+        {
+            var added = result.Add(table);
+            if (!added)
+            {
+                //log warning
+            }
+        }
+
+        var contextModel = context.Model;
+        foreach (var entity in entities ?? [])
+        {
+            var entityType = contextModel.FindEntityType(entity) ??
+                throw new NullReferenceException($"Table entity type not found for type {entity.FullName}");
+
+            var tableName = entityType.GetSchemaQualifiedTableName() ??
+                throw new NullReferenceException($"Table entity type not found for type {entity.FullName}");
+
+            var added = result.Add(tableName);
+            if (!added)
+            {
+                //log warning
+            }
+        }
+
+        return result.ToArray();
     }
 }
