@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Routing;
+﻿using Microsoft.AspNetCore.Components.Routing;
+using Microsoft.AspNetCore.Routing;
 using System.Reflection;
 using Tracker.AspNet.Attributes;
 using Tracker.AspNet.Extensions;
@@ -23,9 +24,12 @@ public class DefaultActionsDescriptorProvider(EndpointDataSource endpointRouteBu
             var controllerTracking = routeEndpoint.Metadata.GetMetadata<TrackAttribute>();
             if (controllerTracking is not null)
             {
+                var route = routeEndpoint.RoutePattern.RawText ?? controllerTracking.Route ??
+                    throw new NullReferenceException($"Route for '{routeEndpoint.DisplayName}' not found.");
+                
                 yield return new ActionDescriptor
                 {
-                    Route = routeEndpoint.RoutePattern.RawText ?? controllerTracking.Route,
+                    Route = route,
                     Tables = controllerTracking.Tables ?? []
                 };
             }
