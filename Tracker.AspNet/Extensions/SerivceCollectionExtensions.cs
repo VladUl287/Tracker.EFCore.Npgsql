@@ -24,7 +24,7 @@ public static class SerivceCollectionExtensions
         services.AddSingleton<IETagGenerator, ETagGenerator>();
         services.AddSingleton<IETagService, ETagService<TContext>>();
 
-        services.AddSingleton<IActionsDescriptorProvider, DefaultActionsDescriptorProvider>();
+        services.AddSingleton<IActionsDescriptorProvider, DefaultActionsDescriptorProvider<TContext>>();
         services.AddSingleton<IActionsRegistry, DefaultActionsRegistry>(provider =>
         {
             var descriptorProvider = provider.GetRequiredService<IActionsDescriptorProvider>();

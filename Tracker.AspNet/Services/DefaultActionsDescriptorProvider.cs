@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Components.Routing;
-using Microsoft.AspNetCore.Routing;
+﻿using Microsoft.AspNetCore.Routing;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
 using Tracker.AspNet.Attributes;
@@ -9,12 +9,13 @@ using Tracker.AspNet.Services.Contracts;
 
 namespace Tracker.AspNet.Services;
 
-public class DefaultActionsDescriptorProvider(
-    EndpointDataSource endpointRouteBuilder, ILogger<DefaultActionsDescriptorProvider> logger) : IActionsDescriptorProvider
+public class DefaultActionsDescriptorProvider<TContext>(
+    EndpointDataSource endpDataSrc, ILogger<DefaultActionsDescriptorProvider<TContext>> logger) : IActionsDescriptorProvider
+    where TContext : DbContext
 {
     public virtual IEnumerable<ActionDescriptor> GetActionsDescriptors(params Assembly[] assemblies)
     {
-        foreach (var endpoint in endpointRouteBuilder.Endpoints)
+        foreach (var endpoint in endpDataSrc.Endpoints)
         {
             if (endpoint is not RouteEndpoint routeEndpoint)
                 continue;
