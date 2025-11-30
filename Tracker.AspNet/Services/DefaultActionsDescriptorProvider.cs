@@ -19,7 +19,7 @@ public class DefaultActionsDescriptorProvider(EndpointDataSource endpointRouteBu
             }
 
             var methods = routeEndpoint.Metadata.GetMetadata<HttpMethodMetadata>()?.HttpMethods ?? [];
-            if (methods is not ["GET"])
+            if (!methods.Any(c => c.Equals("GET", StringComparison.OrdinalIgnoreCase)))
             {
                 continue;
             }
