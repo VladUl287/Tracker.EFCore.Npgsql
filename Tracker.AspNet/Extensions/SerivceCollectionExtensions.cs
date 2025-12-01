@@ -30,8 +30,10 @@ public static class SerivceCollectionExtensions
     public static IApplicationBuilder UseTracker<TContext>(this IApplicationBuilder builder, Action<MiddlewareOptions> configure)
         where TContext : DbContext
     {
+        ArgumentNullException.ThrowIfNull(configure, nameof(configure));
+
         var options = new MiddlewareOptions();
-        configure?.Invoke(options);
+        configure(options);
         return builder.UseTracker<TContext>(options);
     }
 
