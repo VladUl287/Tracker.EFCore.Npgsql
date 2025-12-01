@@ -14,4 +14,9 @@ public class ETagGenerator : IETagGenerator
     {
         return ETagUtils.GenETagTicks(timestamps);
     }
+
+    public string GenerateETag(uint xact)
+    {
+        throw new NotImplementedException();
+    }
 }
