@@ -10,14 +10,30 @@ using Tracker.Core.Extensions;
 namespace Tracker.AspNet.Extensions;
 
 public static class SerivceCollectionExtensions
-{    
-    public static IServiceCollection AddTracker<TContext>(this IServiceCollection services)
+{
+    public static IServiceCollection AddTracker<TContext>(this IServiceCollection services, GlobalOptions options)
          where TContext : DbContext
     {
+        services.AddSingleton(options);
+
         services.AddSingleton<IETagGenerator, ETagGenerator>();
         services.AddSingleton<IETagService, ETagService<TContext>>();
 
         return services;
+    }
+
+    public static IServiceCollection AddTracker<TContext>(this IServiceCollection services)
+         where TContext : DbContext
+    {
+        return services.AddTracker<TContext>(new GlobalOptions());
+    }
+
+    public static IServiceCollection AddTracker<TContext>(this IServiceCollection services, Action<GlobalOptions> configure)
+         where TContext : DbContext
+    {
+        var options = new GlobalOptions();
+        configure(options);
+        return services.AddTracker<TContext>(options);
     }
 
     public static IApplicationBuilder UseTracker<TContext>(this IApplicationBuilder builder)
