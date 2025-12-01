@@ -8,12 +8,9 @@ using Tracker.AspNet.Services.Contracts;
 namespace Tracker.AspNet.Attributes;
 
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
-public sealed class TrackAttribute : Attribute, IAsyncActionFilter
+public sealed class TrackAttribute() : Attribute, IAsyncActionFilter
 {
-    public TrackAttribute()
-    { }
-
-    public TrackAttribute(string[] tables)
+    public TrackAttribute(string[] tables) : this()
     {
         ArgumentNullException.ThrowIfNull(tables, nameof(tables));
         Tables = tables;
