@@ -1,13 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using Tracker.AspNet.Extensions;
 using Tracker.AspNet.Models;
 using Tracker.AspNet.Services.Contracts;
 
 namespace Tracker.AspNet.Middlewares;
 
-public sealed class TrackerMiddleware<TContext>(
-    RequestDelegate next, IETagService eTagService, MiddlewareOptions options) where TContext : DbContext
+public sealed class TrackerMiddleware(RequestDelegate next, IETagService eTagService, MiddlewareOptions opts)
 {
     public async Task InvokeAsync(HttpContext context)
     {
@@ -17,9 +15,18 @@ public sealed class TrackerMiddleware<TContext>(
             return;
         }
 
+        if (opts is not null)
+        {
+            if (opts.Filter is null || !opts.Filter(context))
+            {
+                await next(context);
+                return;
+            }
+        }
+
         var token = context.RequestAborted;
 
-        var shouldReturnNotModified = await eTagService.TrySetETagAsync(context, options.Tables ?? [], token);
+        var shouldReturnNotModified = await eTagService.TrySetETagAsync(context, opts?.Tables ?? [], token);
         if (shouldReturnNotModified)
         {
             context.Response.StatusCode = StatusCodes.Status304NotModified;

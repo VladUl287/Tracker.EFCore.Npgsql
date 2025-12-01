@@ -51,6 +51,6 @@ public static class SerivceCollectionExtensions
             options.Tables = [.. options.Tables, .. tablesNames];
         }
 
-        return builder.UseMiddleware<TrackerMiddleware<TContext>>(options);
+        return builder.UseMiddleware<TrackerMiddleware>(options);
     }
 }
