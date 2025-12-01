@@ -11,48 +11,34 @@ namespace Tracker.AspNet.Extensions;
 
 public static class SerivceCollectionExtensions
 {    
-    public static IServiceCollection AddTracker<TContext>(this IServiceCollection services, MiddlewareOptions options)
+    public static IServiceCollection AddTracker<TContext>(this IServiceCollection services)
          where TContext : DbContext
     {
-        services.AddSingleton(options);
-
         services.AddSingleton<IETagGenerator, ETagGenerator>();
         services.AddSingleton<IETagService, ETagService<TContext>>();
 
         return services;
     }
 
-    public static IServiceCollection AddTracker<TContext>(this IServiceCollection services)
-     where TContext : DbContext
-    {
-        return services.AddTracker<TContext>(new MiddlewareOptions());
-    }
-
-    public static IServiceCollection AddTracker<TContext>(this IServiceCollection services, Action<MiddlewareOptions> configure)
-         where TContext : DbContext
-    {
-        var options = new MiddlewareOptions();
-        configure(options);
-        return services.AddTracker<TContext>(options);
-    }
-
     public static IApplicationBuilder UseTracker<TContext>(this IApplicationBuilder builder)
         where TContext : DbContext
     {
-        return builder.UseMiddleware<TrackerMiddleware<TContext>>();
-    }
-
-    public static IApplicationBuilder UseTracker<TContext>(this IApplicationBuilder builder, MiddlewareOptions options)
-        where TContext : DbContext
-    {
-        return builder.UseMiddleware<TrackerMiddleware<TContext>>(options);
+        var options = new MiddlewareOptions();
+        return builder.UseTracker<TContext>(options);
     }
 
     public static IApplicationBuilder UseTracker<TContext>(this IApplicationBuilder builder, Action<MiddlewareOptions> configure)
         where TContext : DbContext
     {
         var options = new MiddlewareOptions();
-        configure(options);
+        configure?.Invoke(options);
+        return builder.UseTracker<TContext>(options);
+    }
+
+    public static IApplicationBuilder UseTracker<TContext>(this IApplicationBuilder builder, MiddlewareOptions options)
+        where TContext : DbContext
+    {
+        ArgumentNullException.ThrowIfNull(options, nameof(options));
 
         if (options.Entities is { Length: > 0 })
         {
