@@ -22,7 +22,7 @@ public sealed class TrackAttribute : Attribute, IAsyncActionFilter
     public string[] Tables { get; } = [];
     public bool IsGlobalTrack => Tables is null or { Length: 0 };
 
-    public async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
+    public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
         if (IsGetMethod(context.HttpContext))
         {
@@ -49,8 +49,6 @@ public sealed class TrackAttribute : Attribute, IAsyncActionFilter
 
         await next();
     }
-
-    public Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next) => Task.CompletedTask;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsGetMethod(HttpContext context) => context.Request.Method == HttpMethod.Get.Method;

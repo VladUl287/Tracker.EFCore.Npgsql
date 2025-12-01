@@ -31,10 +31,6 @@ var app = builder.Build();
 
     app.UseAuthorization();
 
-    app.MapGroup("/api/users")
-        .MapUserApi()
-        .WithTracking(tables: ["roles"]);
-
     app.MapGet("/api/role", () => "Get all roles")
         .WithTracking(tables: ["roles"]);
 
