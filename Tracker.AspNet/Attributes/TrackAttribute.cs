@@ -11,7 +11,7 @@ namespace Tracker.AspNet.Attributes;
 public sealed class TrackAttribute : Attribute, IAsyncActionFilter
 {
     public TrackAttribute()
-    {}
+    { }
 
     public TrackAttribute(string[] tables)
     {
@@ -20,7 +20,6 @@ public sealed class TrackAttribute : Attribute, IAsyncActionFilter
     }
 
     public string[] Tables { get; } = [];
-    public bool IsGlobalTrack => Tables is null or { Length: 0 };
 
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
@@ -33,10 +32,7 @@ public sealed class TrackAttribute : Attribute, IAsyncActionFilter
         var etagService = context.HttpContext.RequestServices.GetRequiredService<IETagService>();
         var token = context.HttpContext.RequestAborted;
 
-        var shouldReturnNotModified = IsGlobalTrack
-          ? await etagService.TrySetETagAsync(context.HttpContext, token)
-          : await etagService.TrySetETagAsync(context.HttpContext, Tables, token);
-
+        var shouldReturnNotModified = await etagService.TrySetETagAsync(context.HttpContext, Tables, token);
         if (shouldReturnNotModified)
         {
             context.Result = new StatusCodeResult(StatusCodes.Status304NotModified);

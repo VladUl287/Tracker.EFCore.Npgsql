@@ -17,26 +17,18 @@ public sealed class ETagEndpointFilter : IEndpointFilter
     }
 
     public string[] Tables { get; } = [];
-    public bool IsGlobalTrack => Tables is null or { Length: 0 };
 
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {
-        if (context.HttpContext.IsGetRequest())
-        {
-            var etagService = context.HttpContext.RequestServices.GetRequiredService<IETagService>();
-            var token = context.HttpContext.RequestAborted;
+        if (!context.HttpContext.IsGetRequest())
+            return await next(context);
 
-            if (IsGlobalTrack)
-            {
-                if (await etagService.TrySetETagAsync(context.HttpContext, token))
-                    return Results.StatusCode(StatusCodes.Status304NotModified);
-            }
-            else
-            {
-                if (await etagService.TrySetETagAsync(context.HttpContext, Tables, token))
-                    return Results.StatusCode(StatusCodes.Status304NotModified);
-            }
-        }
+        var etagService = context.HttpContext.RequestServices.GetRequiredService<IETagService>();
+        var token = context.HttpContext.RequestAborted;
+
+        var shouldReturnNotModified = await etagService.TrySetETagAsync(context.HttpContext, Tables, token);
+        if (shouldReturnNotModified)
+            return Results.StatusCode(StatusCodes.Status304NotModified);
 
         return await next(context);
     }
