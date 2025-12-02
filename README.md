@@ -3,3 +3,5 @@ TODO:
     - Multiple DbContext support
     - Use AssemblyWriteTime in etag generator
     - Add suffix in etag generator from tracker options
+    - Make global options immutable after registration
+    - Use optimized NpgsqlDataSource for scalar requests
