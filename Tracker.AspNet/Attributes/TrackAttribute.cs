@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 using Tracker.AspNet.Models;
 using Tracker.AspNet.Services.Contracts;
 
@@ -11,7 +12,7 @@ namespace Tracker.AspNet.Attributes;
 public sealed class TrackAttribute : Attribute, IAsyncActionFilter
 {
     private static readonly ConcurrentDictionary<string, ImmutableGlobalOptions> _optionsCache = new();
-    private readonly ImmutableArray<string> _tables;
+    private readonly ImmutableArray<string> _tables = [];
 
     public TrackAttribute()
     { }
@@ -24,16 +25,10 @@ public sealed class TrackAttribute : Attribute, IAsyncActionFilter
 
     public async Task OnActionExecutionAsync(ActionExecutingContext execContext, ActionExecutionDelegate next)
     {
-        var httpCtx = execContext.HttpContext;
+        var options = GetOptions(execContext);
 
-        var actionId = execContext.ActionDescriptor.Id;
-        var options = _optionsCache.GetOrAdd(actionId,
-            (key, state) =>
-            {
-                var baseOptions = state.httpCtx.RequestServices.GetRequiredService<ImmutableGlobalOptions>();
-                return baseOptions with { Tables = _tables };
-            },
-            (httpCtx, _tables));
+        var httpCtx = execContext.HttpContext;
+        var canceltoken = execContext.HttpContext.RequestAborted;
 
         var requestFilter = httpCtx.RequestServices.GetRequiredService<IRequestFilter>();
         var shouldProcessRequest = requestFilter.ShouldProcessRequest(httpCtx, options);
@@ -43,14 +38,29 @@ public sealed class TrackAttribute : Attribute, IAsyncActionFilter
             return;
         }
 
-        var etagService = execContext.HttpContext.RequestServices.GetRequiredService<IETagService>();
-        var token = execContext.HttpContext.RequestAborted;
+        if (canceltoken.IsCancellationRequested)
+            return;
 
-        var shouldReturnNotModified = await etagService.TrySetETagAsync(httpCtx, options, token);
+        var etagService = execContext.HttpContext.RequestServices.GetRequiredService<IETagService>();
+        var shouldReturnNotModified = await etagService.TrySetETagAsync(httpCtx, options, canceltoken);
         if (!shouldReturnNotModified)
         {
             await next();
             return;
         }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private ImmutableGlobalOptions GetOptions(ActionExecutingContext execContext)
+    {
+        var actionId = execContext.ActionDescriptor.Id;
+        var httpCtx = execContext.HttpContext;
+        return _optionsCache.GetOrAdd(actionId,
+            (key, state) =>
+            {
+                var baseOptions = state.httpCtx.RequestServices.GetRequiredService<ImmutableGlobalOptions>();
+                return baseOptions with { Tables = _tables };
+            },
+            (httpCtx, _tables));
     }
 }
