@@ -2,8 +2,8 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Tracker.AspNet.Filters;
 using Tracker.AspNet.Models;
+using Tracker.AspNet.Services;
 using Tracker.AspNet.Services.Contracts;
 
 namespace Tracker.AspNet.Extensions;
@@ -12,7 +12,7 @@ public static class MinimalApiExtensions
 {
     public static IEndpointConventionBuilder WithTracking(this IEndpointConventionBuilder endpoint)
     {
-        return endpoint.AddEndpointFilter<IEndpointConventionBuilder, ETagEndpointFilter>();
+        return endpoint.AddEndpointFilter<IEndpointConventionBuilder, TrackerEndpointFilter>();
     }
 
     public static IEndpointConventionBuilder WithTracking<TContext>(this IEndpointConventionBuilder endpoint, GlobalOptions options)
@@ -21,9 +21,12 @@ public static class MinimalApiExtensions
         return endpoint.AddEndpointFilterFactory((provider, next) =>
         {
             var builder = provider.ApplicationServices.GetRequiredService<IOptionsBuilder<GlobalOptions, ImmutableGlobalOptions>>();
-            var etagService = provider.ApplicationServices.GetRequiredService<IETagService>();
             var immutableOptions = builder.Build<TContext>(options);
-            var filter = new ETagEndpointFilter(etagService, immutableOptions);
+
+            var etagService = provider.ApplicationServices.GetRequiredService<IETagService>();
+            var requestFilter = provider.ApplicationServices.GetRequiredService<IRequestFilter>();
+
+            var filter = new TrackerEndpointFilter(etagService, requestFilter, immutableOptions);
             return (context) => filter.InvokeAsync(context, next);
         });
     }
