@@ -14,9 +14,6 @@ public sealed class TrackAttribute : Attribute, IAsyncActionFilter
     private static readonly ConcurrentDictionary<string, ImmutableGlobalOptions> _optionsCache = new();
     private readonly ImmutableArray<string> _tables = [];
 
-    public TrackAttribute()
-    { }
-
     public TrackAttribute(params string[] tables)
     {
         ArgumentNullException.ThrowIfNull(tables, nameof(tables));
