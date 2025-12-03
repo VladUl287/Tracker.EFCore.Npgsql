@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using Tracker.AspNet.Models;
@@ -11,18 +10,20 @@ namespace Tracker.AspNet.Attributes;
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
 public sealed class TrackAttribute : Attribute, IAsyncActionFilter
 {
-    private static readonly ConcurrentDictionary<string, ImmutableGlobalOptions> _optionsCache = new();
+    private ImmutableGlobalOptions? _actionOptions;
+    private readonly Lock _lock = new();
     private readonly ImmutableArray<string> _tables = [];
 
     public TrackAttribute(params string[] tables)
     {
         ArgumentNullException.ThrowIfNull(tables, nameof(tables));
+
         _tables = [.. tables];
     }
 
     public async Task OnActionExecutionAsync(ActionExecutingContext execContext, ActionExecutionDelegate next)
     {
-        var options = GetOptions(execContext);
+        var options = GetOrSetOptions(execContext);
 
         var httpCtx = execContext.HttpContext;
         var canceltoken = execContext.HttpContext.RequestAborted;
@@ -48,16 +49,22 @@ public sealed class TrackAttribute : Attribute, IAsyncActionFilter
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private ImmutableGlobalOptions GetOptions(ActionExecutingContext execContext)
+    private ImmutableGlobalOptions GetOrSetOptions(ActionExecutingContext execContext)
     {
-        var actionId = execContext.ActionDescriptor.Id;
-        var httpCtx = execContext.HttpContext;
-        return _optionsCache.GetOrAdd(actionId,
-            (key, state) =>
+        if (_actionOptions is not null)
+            return _actionOptions;
+        
+        lock (_lock)
+        {
+            if (_actionOptions is not null)
+                return _actionOptions;
+
+            var baseOptions = execContext.HttpContext.RequestServices.GetRequiredService<ImmutableGlobalOptions>();
+            _actionOptions = baseOptions with
             {
-                var baseOptions = state.httpCtx.RequestServices.GetRequiredService<ImmutableGlobalOptions>();
-                return baseOptions with { Tables = _tables };
-            },
-            (httpCtx, _tables));
+                Tables = _tables
+            };
+            return _actionOptions;
+        }
     }
 }
