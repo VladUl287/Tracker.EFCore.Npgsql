@@ -3,13 +3,15 @@ using Tracker.AspNet.Services.Contracts;
 
 namespace Tracker.AspNet.Services;
 
-public sealed class SqlServerOperations(DbDataSource datSource) : ISourceOperations
+public sealed class SqlServerOperations(DbDataSource dataSource) : ISourceOperations
 {
     public string SourceId => throw new NotImplementedException();
 
-    public Task<DateTimeOffset?> GetLastTimestamp(string key, CancellationToken token)
+    public async Task<DateTimeOffset?> GetLastTimestamp(string key, CancellationToken token)
     {
-        throw new NotImplementedException();
+        ArgumentException.ThrowIfNullOrEmpty(key, nameof(key));
+
+        return null;
     }
 
     public Task<IEnumerable<DateTimeOffset>> GetLastTimestamp(string[] keys, CancellationToken token)
