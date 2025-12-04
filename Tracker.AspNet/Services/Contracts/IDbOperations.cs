@@ -2,6 +2,6 @@
 
 public interface IDbOperations
 {
-    Task<DateTimeOffset?> GetLastTimestamp(string table);
-    Task<uint?> GetLastCommittedXact(string table);
+    Task<DateTimeOffset?> GetLastTimestamp(string table, CancellationToken token);
+    Task<uint?> GetLastCommittedXact(CancellationToken token);
 }

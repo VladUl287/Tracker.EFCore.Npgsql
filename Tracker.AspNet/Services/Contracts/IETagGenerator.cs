@@ -1,4 +1,6 @@
-﻿namespace Tracker.AspNet.Services.Contracts;
+﻿using Tracker.AspNet.Models;
+
+namespace Tracker.AspNet.Services.Contracts;
 
 public interface IETagGenerator
 {

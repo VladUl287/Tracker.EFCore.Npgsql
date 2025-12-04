@@ -1,31 +1,22 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.Collections.Immutable;
 using Tracker.AspNet.Logging;
 using Tracker.AspNet.Models;
 using Tracker.AspNet.Services.Contracts;
-using Tracker.Core.Extensions;
 
 namespace Tracker.AspNet.Services;
 
 public class ETagService<TContext>(
-    IETagGenerator etagGenerator, ILogger<ETagService<TContext>> logger) : IETagService where TContext : DbContext
+    IETagGenerator etagGenerator, IDbOperationsFactory dbOperationsFactory, 
+    ILogger<ETagService<TContext>> logger) : IETagService where TContext : DbContext
 {
     public async Task<bool> TrySetETagAsync(HttpContext context, ImmutableGlobalOptions options, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(context, nameof(context));
         ArgumentNullException.ThrowIfNull(options, nameof(options));
 
-        var dbContext = context.RequestServices.GetService<TContext>();
-        if (dbContext is null)
-        {
-            logger.LogDbContextNotFound(typeof(TContext).Name);
-            return false;
-        }
-
-        var etag = await GenerateETag(options.Tables, dbContext, token);
+        var etag = await GenerateETag(options, token);
         if (etag is null)
         {
             logger.LogLastTimestampNotFound();
@@ -45,11 +36,13 @@ public class ETagService<TContext>(
         return false;
     }
 
-    private async Task<string?> GenerateETag(ImmutableArray<string> tables, TContext dbContext, CancellationToken token)
+    private async Task<string?> GenerateETag(ImmutableGlobalOptions options, CancellationToken token)
     {
-        if (tables is { Length: 0 })
+        var dbOpeartions = dbOperationsFactory.Create(options.Provider);
+
+        if (options is { Tables.Length: 0 })
         {
-            var xact = await dbContext.GetLastCommittedXact(token);
+            var xact = await dbOpeartions.GetLastCommittedXact(token);
             if (xact is null)
             {
                 logger.LogLastTimestampNotFound();
@@ -58,16 +51,16 @@ public class ETagService<TContext>(
             return etagGenerator.GenerateETag(xact.Value);
         }
 
-        var timestamps = new List<DateTimeOffset>(tables.Length);
-        foreach (var table in tables)
+        var timestamps = new List<DateTimeOffset>(options.Tables.Length);
+        foreach (var table in options.Tables)
         {
-            var lastTimestamp = await dbContext.GetLastTimestamp(table, token);
-            if (string.IsNullOrEmpty(lastTimestamp))
+            var lastTimestamp = await dbOpeartions.GetLastTimestamp(table, token);
+            if (lastTimestamp is null)
             {
                 logger.LogLastTimestampNotFound();
                 return null;
             }
-            timestamps.Add(DateTimeOffset.Parse(lastTimestamp));
+            timestamps.Add(lastTimestamp.Value);
         }
         return etagGenerator.GenerateETag([.. timestamps]);
     }
