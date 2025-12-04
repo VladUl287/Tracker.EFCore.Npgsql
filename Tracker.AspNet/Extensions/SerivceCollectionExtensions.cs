@@ -76,6 +76,13 @@ public static class SerivceCollectionExtensions
     public static IServiceCollection AddNpgsql<TContext>(this IServiceCollection services)
          where TContext : DbContext
     {
+        var sourceId = typeof(TContext).GetTypeHashId();
+        return services.AddNpgsql<TContext>(sourceId);
+    }
+
+    public static IServiceCollection AddNpgsql<TContext>(this IServiceCollection services, string sourceId)
+         where TContext : DbContext
+    {
         return services.AddSingleton<ISourceOperations>((provider) =>
         {
             using var scope = provider.CreateScope();
@@ -84,7 +91,6 @@ public static class SerivceCollectionExtensions
             var connectionString = dbContext.Database.GetConnectionString() ??
                 throw new NullReferenceException($"Connection string is not found for context {typeof(TContext).FullName}.");
 
-            var sourceId = typeof(TContext).GetTypeHashId();
             var builder = new NpgsqlDataSourceBuilder(connectionString);
             var dataSource = builder.Build();
 
@@ -100,6 +106,17 @@ public static class SerivceCollectionExtensions
                 sourceId, new NpgsqlDataSourceBuilder(connectionString).Build()
             )
         );
+    }
+
+    public static IServiceCollection AddNpgsql(this IServiceCollection services, string sourceId, Action<NpgsqlDataSourceBuilder> configure)
+    {
+        return services.AddSingleton<ISourceOperations>((_) =>
+        {
+            var dataSourceBuilder = new NpgsqlDataSourceBuilder();
+            configure(dataSourceBuilder);
+            var dataSource = dataSourceBuilder.Build();
+            return new NpgsqlOperations(sourceId, dataSource);
+        });
     }
 
     public static IServiceCollection AddTracker<TContext>(this IServiceCollection services, Action<GlobalOptions> configure)
