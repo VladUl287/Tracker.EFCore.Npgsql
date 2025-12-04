@@ -9,6 +9,19 @@ namespace Tracker.AspNet.Services;
 
 public sealed class GlobalOptionsBuilder(IServiceScopeFactory scopeFactory) : IOptionsBuilder<GlobalOptions, ImmutableGlobalOptions>
 {
+    public ImmutableGlobalOptions Build(GlobalOptions options)
+    {
+        return new ImmutableGlobalOptions
+        {
+            Source = options.Source,
+            Filter = options.Filter,
+            Suffix = options.Suffix,
+            Tables = [.. options.Tables],
+            TablesCacheLifeTime = options.TablesCacheLifeTime,
+            XactCacheLifeTime = options.XactCacheLifeTime,
+        };
+    }
+
     public ImmutableGlobalOptions Build<TContext>(GlobalOptions options) where TContext : DbContext
     {
         using var scope = scopeFactory.CreateScope();
