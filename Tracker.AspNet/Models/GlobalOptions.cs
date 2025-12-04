@@ -5,7 +5,7 @@ namespace Tracker.AspNet.Models;
 
 public sealed class GlobalOptions
 {
-    public string Provider { get; init; } = nameof(Npgsql.EntityFrameworkCore.PostgreSQL);
+    public string Source { get; init; } = string.Empty;
 
     public Func<HttpContext, bool> Filter { get; set; } = (_) => true;
 
@@ -21,8 +21,6 @@ public sealed class GlobalOptions
 public sealed record ImmutableGlobalOptions
 {
     public string Source { get; init; } = string.Empty;
-
-    public string Provider { get; init; } = nameof(Npgsql.EntityFrameworkCore.PostgreSQL);
 
     public Func<HttpContext, bool> Filter { get; init; } = (_) => true;
 

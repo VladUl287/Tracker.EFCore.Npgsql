@@ -19,6 +19,7 @@ public sealed class GlobalOptionsBuilder(IServiceScopeFactory scopeFactory) : IO
 
         return new ImmutableGlobalOptions
         {
+            Source = options.Source,
             Filter = options.Filter,
             Suffix = options.Suffix,
             Tables = tables,
