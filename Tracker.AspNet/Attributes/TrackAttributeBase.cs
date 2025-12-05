@@ -1,17 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Immutable;
 using Tracker.AspNet.Models;
 using Tracker.AspNet.Services.Contracts;
 
 namespace Tracker.AspNet.Attributes;
 
-public abstract class TrackAttributeBase(string[]? tables, string? sourceId, string? cacheControl) : Attribute, IAsyncActionFilter
+public abstract class TrackAttributeBase : Attribute, IAsyncActionFilter
 {
-    protected readonly ImmutableArray<string> _tables = tables?.ToImmutableArray() ?? [];
-    protected readonly string? _sourceId = sourceId;
-    protected readonly string? _cacheControl = cacheControl;
-
     public async Task OnActionExecutionAsync(ActionExecutingContext execContext, ActionExecutionDelegate next)
     {
         var options = GetOrSetOptions(execContext);

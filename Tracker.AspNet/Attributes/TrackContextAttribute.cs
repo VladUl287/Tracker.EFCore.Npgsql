@@ -9,8 +9,9 @@ namespace Tracker.AspNet.Attributes;
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
 public sealed class TrackAttribute<TContext>(
     string[]? tables = null,
+    Type[]? entities = null,
     string? sourceId = null,
-    string? cacheControl = null) : TrackAttributeBase(tables, sourceId, cacheControl) where TContext : DbContext
+    string? cacheControl = null) : TrackAttributeBase where TContext : DbContext
 {
     private ImmutableGlobalOptions? _actionOptions;
     private readonly Lock _lock = new();
@@ -25,12 +26,24 @@ public sealed class TrackAttribute<TContext>(
             if (_actionOptions is not null)
                 return _actionOptions;
 
-            var baseOptions = execContext.HttpContext.RequestServices.GetRequiredService<ImmutableGlobalOptions>();
+            var scopeFactory = execContext.HttpContext.RequestServices.GetRequiredService<IServiceScopeFactory>();
+            using var scope = scopeFactory.CreateScope();
+
+            var uniqueTables = new HashSet<string>();
+            foreach (var table in tables ?? [])
+                uniqueTables.Add(table);
+
+            var dbContext = scope.ServiceProvider.GetRequiredService<TContext>();
+            var tablesNames = dbContext.GetTablesNames(entities ?? []);
+            foreach (var table in tablesNames)
+                uniqueTables.Add(table);
+
+            var baseOptions = scope.ServiceProvider.GetRequiredService<ImmutableGlobalOptions>();
             _actionOptions = baseOptions with
             {
-                CacheControl = _cacheControl ?? baseOptions.CacheControl,
-                Source = _sourceId ?? typeof(TContext).GetTypeHashId(),
-                Tables = _tables
+                CacheControl = cacheControl ?? baseOptions.CacheControl,
+                Source = sourceId ?? typeof(TContext).GetTypeHashId(),
+                Tables = [.. uniqueTables]
             };
             return _actionOptions;
         }

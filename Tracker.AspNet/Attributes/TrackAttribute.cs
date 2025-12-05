@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Immutable;
 using Tracker.AspNet.Models;
 
 namespace Tracker.AspNet.Attributes;
@@ -8,7 +9,7 @@ namespace Tracker.AspNet.Attributes;
 public sealed class TrackAttribute(
     string[]? tables = null,
     string? sourceId = null,
-    string? cacheControl = null) : TrackAttributeBase(tables, sourceId, cacheControl)
+    string? cacheControl = null) : TrackAttributeBase
 {
     private ImmutableGlobalOptions? _actionOptions;
     private readonly Lock _lock = new();
@@ -26,9 +27,9 @@ public sealed class TrackAttribute(
             var baseOptions = execContext.HttpContext.RequestServices.GetRequiredService<ImmutableGlobalOptions>();
             _actionOptions = baseOptions with
             {
-                CacheControl = _cacheControl ?? baseOptions.CacheControl,
-                Source = _sourceId ?? baseOptions.Source,
-                Tables = _tables
+                CacheControl = cacheControl ?? baseOptions.CacheControl,
+                Source = sourceId ?? baseOptions.Source,
+                Tables = tables?.ToImmutableArray() ?? []
             };
             return _actionOptions;
         }
