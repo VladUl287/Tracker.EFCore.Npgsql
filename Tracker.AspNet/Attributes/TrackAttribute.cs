@@ -28,7 +28,6 @@ public sealed class TrackAttribute : Attribute, IAsyncActionFilter
         _cacheControl = cacheControl;
     }
 
-
     public async Task OnActionExecutionAsync(ActionExecutingContext execContext, ActionExecutionDelegate next)
     {
         var options = GetOrSetOptions(execContext);
