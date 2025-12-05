@@ -15,6 +15,7 @@ public sealed class GlobalOptionsBuilder(IServiceScopeFactory scopeFactory) : IO
         {
             Source = options.Source,
             SourceOperations = options.SourceOperations,
+            SourceOperationsFactory = options.SourceOperationsFactory,
             Filter = options.Filter,
             Suffix = options.Suffix,
             Tables = [.. options.Tables],
@@ -32,13 +33,14 @@ public sealed class GlobalOptionsBuilder(IServiceScopeFactory scopeFactory) : IO
         var tables = new HashSet<string>([.. options.Tables, .. tablesNames]).ToImmutableArray();
 
         var source = options.Source;
-        if (string.IsNullOrEmpty(source))
+        if (string.IsNullOrEmpty(source) && options is { SourceOperations: null, SourceOperationsFactory: null })
             source = typeof(TContext).GetTypeHashId();
 
         return new ImmutableGlobalOptions
         {
             Source = source,
             SourceOperations = options.SourceOperations,
+            SourceOperationsFactory = options.SourceOperationsFactory,
             Filter = options.Filter,
             Suffix = options.Suffix,
             Tables = tables,

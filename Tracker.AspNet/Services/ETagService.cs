@@ -14,7 +14,10 @@ public class ETagService(
         ArgumentNullException.ThrowIfNull(context, nameof(context));
         ArgumentNullException.ThrowIfNull(options, nameof(options));
 
-        var sourceOperations = options.SourceOperations ?? operationsResolver.Resolve(options.Source);
+        var sourceOperations = options.SourceOperations ?? 
+            options.SourceOperationsFactory?.Invoke(context) ?? 
+            operationsResolver.Resolve(options.Source);
+
         var etag = await GetETag(options, sourceOperations, token);
         if (etag is null)
         {

@@ -8,6 +8,7 @@ public sealed class GlobalOptions
 {
     public string? Source { get; set; }
     public ISourceOperations? SourceOperations { get; set; }
+    public Func<HttpContext, ISourceOperations>? SourceOperationsFactory { get; set; }
 
     public Func<HttpContext, bool> Filter { get; set; } = (_) => true;
 
@@ -24,6 +25,7 @@ public sealed record ImmutableGlobalOptions
 {
     public string? Source { get; init; }
     public ISourceOperations? SourceOperations { get; init; }
+    public Func<HttpContext, ISourceOperations>? SourceOperationsFactory { get; init; }
 
     public Func<HttpContext, bool> Filter { get; init; } = (_) => true;
 
