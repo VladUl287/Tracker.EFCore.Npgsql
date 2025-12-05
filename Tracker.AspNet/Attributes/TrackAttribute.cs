@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
 using Tracker.AspNet.Models;
 using Tracker.AspNet.Services.Contracts;
@@ -7,26 +8,21 @@ using Tracker.AspNet.Services.Contracts;
 namespace Tracker.AspNet.Attributes;
 
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
-public sealed class TrackAttribute(params string[] tables) : Attribute, IAsyncActionFilter
+public sealed class TrackAttribute(
+    string[]? tables = null, string? sourceId = null, string? cacheControl = null) : Attribute, IAsyncActionFilter
 {
-    private readonly string[] _tables = tables ?? throw new NullReferenceException();
-    private readonly string? _sourceId = null;
-    private readonly string? _cacheControl = null;
-
-    public TrackAttribute(string? sourceId = null, params string[] tables) : this(tables)
-        => _sourceId = sourceId;
-
-    public TrackAttribute(string? sourceId = null, string? cacheControl = null, params string[] tables) : this(sourceId, tables)
-        => _cacheControl = cacheControl;
+    private readonly ImmutableArray<string> _tables = tables?.ToImmutableArray() ?? [];
+    private readonly string? _sourceId = sourceId;
+    private readonly string? _cacheControl = cacheControl;
 
     public async Task OnActionExecutionAsync(ActionExecutingContext execContext, ActionExecutionDelegate next)
     {
         var options = GetOrSetOptions(execContext);
 
         var httpCtx = execContext.HttpContext;
-        var canceltoken = execContext.HttpContext.RequestAborted;
+        var reqServices = httpCtx.RequestServices;
 
-        var requestFilter = httpCtx.RequestServices.GetRequiredService<IRequestFilter>();
+        var requestFilter = reqServices.GetRequiredService<IRequestFilter>();
         var shouldProcessRequest = requestFilter.ShouldProcessRequest(httpCtx, options);
         if (!shouldProcessRequest)
         {
@@ -34,11 +30,12 @@ public sealed class TrackAttribute(params string[] tables) : Attribute, IAsyncAc
             return;
         }
 
-        if (canceltoken.IsCancellationRequested)
+        var cancelToken = httpCtx.RequestAborted;
+        if (cancelToken.IsCancellationRequested)
             return;
 
-        var etagService = execContext.HttpContext.RequestServices.GetRequiredService<IETagService>();
-        var shouldReturnNotModified = await etagService.TrySetETagAsync(httpCtx, options, canceltoken);
+        var etagService = reqServices.GetRequiredService<IETagService>();
+        var shouldReturnNotModified = await etagService.TrySetETagAsync(httpCtx, options, cancelToken);
         if (!shouldReturnNotModified)
         {
             await next();
@@ -65,7 +62,7 @@ public sealed class TrackAttribute(params string[] tables) : Attribute, IAsyncAc
             {
                 CacheControl = _cacheControl ?? baseOptions.CacheControl,
                 Source = _sourceId ?? baseOptions.Source,
-                Tables = [.. _tables]
+                Tables = _tables
             };
             return _actionOptions;
         }
