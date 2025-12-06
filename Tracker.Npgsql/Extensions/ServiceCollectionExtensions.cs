@@ -31,7 +31,6 @@ public static class ServiceCollectionExtensions
 
             var builder = new NpgsqlDataSourceBuilder(connectionString);
             var dataSource = builder.Build();
-
             return new NpgsqlOperations(sourceId, dataSource);
         });
     }

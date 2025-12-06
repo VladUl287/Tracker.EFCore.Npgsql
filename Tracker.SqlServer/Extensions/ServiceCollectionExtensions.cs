@@ -11,7 +11,9 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddSqlServerSource(this IServiceCollection services, string sourceId, string connectionString)
     {
+        ArgumentException.ThrowIfNullOrEmpty(sourceId);
         ArgumentException.ThrowIfNullOrEmpty(connectionString);
+
         return services.AddSingleton<ISourceOperations>((provider) =>
             new SqlServerOperations(
                sourceId,
@@ -23,6 +25,13 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddSqlServerSource<TContext>(this IServiceCollection services)
          where TContext : DbContext
     {
+        var sourceId = typeof(TContext).GetTypeHashId();
+        return services.AddSqlServerSource<TContext>(sourceId);
+    }
+
+    public static IServiceCollection AddSqlServerSource<TContext>(this IServiceCollection services, string sourceId)
+         where TContext : DbContext
+    {
         return services.AddSingleton<ISourceOperations>((provider) =>
         {
             using var scope = provider.CreateScope();
@@ -31,9 +40,7 @@ public static class ServiceCollectionExtensions
             var connectionString = dbContext.Database.GetConnectionString() ??
                 throw new NullReferenceException($"Connection string is not found for context {typeof(TContext).FullName}.");
 
-            var sourceId = typeof(TContext).GetTypeHashId();
             var dataSource = SqlClientFactory.Instance.CreateDataSource(connectionString);
-
             return new SqlServerOperations(sourceId, dataSource);
         });
     }
