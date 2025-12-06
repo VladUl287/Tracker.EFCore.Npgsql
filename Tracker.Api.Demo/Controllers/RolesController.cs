@@ -11,7 +11,7 @@ namespace Tracker.Api.Demo.Controllers;
 public class RolesController(DatabaseContext dbContext) : ControllerBase
 {
     [HttpGet]
-    [Track<DatabaseContext>(["roles"])]
+    [Track<DatabaseContext>(["roles"], cacheControl: "max-age=60, stale-while-revalidate=60, stale-if-error=86400")]
     public ActionResult<IEnumerable<Role>> GetAll()
     {
         return dbContext.Roles.ToList();

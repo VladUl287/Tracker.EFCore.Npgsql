@@ -41,6 +41,11 @@ var app = builder.Build();
         app.MapOpenApi();
     }
 
+    app.UseCors(config => config
+        .AllowAnyMethod()
+        .AllowAnyMethod()
+        .AllowAnyOrigin());
+
     app.UseAuthorization();
 
     //app.UseTracker<DatabaseContext>(opt =>
