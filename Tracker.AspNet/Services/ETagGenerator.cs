@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
-using Tracker.Core.Extensions;
 using Tracker.AspNet.Services.Contracts;
+using Tracker.Core.Extensions;
 
 namespace Tracker.AspNet.Services;
 

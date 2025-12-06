@@ -6,10 +6,10 @@ namespace Tracker.AspNet.Services;
 
 public sealed class SourceOperationsResolver(IEnumerable<ISourceOperations> sourceOperations) : ISourceOperationsResolver
 {
-    private readonly FrozenDictionary<string, ISourceOperations> _store = 
+    private readonly FrozenDictionary<string, ISourceOperations> _store =
         sourceOperations.ToFrozenDictionary(c => c.SourceId);
 
-    private readonly ISourceOperations _first = 
+    private readonly ISourceOperations _first =
         sourceOperations.First();
 
     public ISourceOperations Resolve(string? sourceId)

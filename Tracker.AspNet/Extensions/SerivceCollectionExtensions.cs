@@ -10,7 +10,7 @@ namespace Tracker.AspNet.Extensions;
 
 public static class SerivceCollectionExtensions
 {
-    public static IServiceCollection AddTracker(this IServiceCollection services) => 
+    public static IServiceCollection AddTracker(this IServiceCollection services) =>
         services.AddTracker(new GlobalOptions());
 
     public static IServiceCollection AddTracker(this IServiceCollection services, GlobalOptions options)
@@ -46,7 +46,7 @@ public static class SerivceCollectionExtensions
         return services.AddTracker(options);
     }
 
-    public static IServiceCollection AddTracker<TContext>(this IServiceCollection services) where TContext : DbContext => 
+    public static IServiceCollection AddTracker<TContext>(this IServiceCollection services) where TContext : DbContext =>
         services.AddTracker<TContext>(new GlobalOptions());
 
     public static IServiceCollection AddTracker<TContext>(this IServiceCollection services, GlobalOptions options)

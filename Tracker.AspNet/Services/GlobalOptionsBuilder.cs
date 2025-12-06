@@ -1,9 +1,9 @@
-﻿using Tracker.AspNet.Models;
-using Tracker.Core.Extensions;
-using System.Collections.Immutable;
-using Microsoft.EntityFrameworkCore;
-using Tracker.AspNet.Services.Contracts;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Immutable;
+using Tracker.AspNet.Models;
+using Tracker.AspNet.Services.Contracts;
+using Tracker.Core.Extensions;
 
 namespace Tracker.AspNet.Services;
 
