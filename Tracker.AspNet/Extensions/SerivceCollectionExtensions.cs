@@ -10,11 +10,44 @@ namespace Tracker.AspNet.Extensions;
 
 public static class SerivceCollectionExtensions
 {
-    public static IServiceCollection AddTracker<TContext>(this IServiceCollection services)
-        where TContext : DbContext
+    public static IServiceCollection AddTracker(this IServiceCollection services) => 
+        services.AddTracker(new GlobalOptions());
+
+    public static IServiceCollection AddTracker(this IServiceCollection services, GlobalOptions options)
     {
-        return services.AddTracker<TContext>(new GlobalOptions());
+        ArgumentNullException.ThrowIfNull(options, nameof(options));
+
+        services.AddSingleton<IOptionsBuilder<GlobalOptions, ImmutableGlobalOptions>, GlobalOptionsBuilder>();
+
+        services.AddSingleton((provider) =>
+        {
+            var optionsBuilder = provider.GetRequiredService<IOptionsBuilder<GlobalOptions, ImmutableGlobalOptions>>();
+            return optionsBuilder.Build(options);
+        });
+
+        services.AddSingleton<IETagGenerator>(new ETagGenerator(Assembly.GetExecutingAssembly()));
+        services.AddSingleton<IETagService, ETagService>();
+
+        services.AddSingleton<ISourceOperationsResolver, SourceOperationsResolver>();
+
+        services.AddSingleton<IRequestFilter, DefaultRequestFilter>();
+
+        services.AddSingleton<IStartupFilter, SourceOperationsValidator>();
+
+        return services;
     }
+
+    public static IServiceCollection AddTracker(this IServiceCollection services, Action<GlobalOptions> configure)
+    {
+        ArgumentNullException.ThrowIfNull(configure, nameof(configure));
+
+        var options = new GlobalOptions();
+        configure(options);
+        return services.AddTracker(options);
+    }
+
+    public static IServiceCollection AddTracker<TContext>(this IServiceCollection services) where TContext : DbContext => 
+        services.AddTracker<TContext>(new GlobalOptions());
 
     public static IServiceCollection AddTracker<TContext>(this IServiceCollection services, GlobalOptions options)
          where TContext : DbContext
