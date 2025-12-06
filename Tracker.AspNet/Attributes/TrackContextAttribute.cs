@@ -16,7 +16,7 @@ public sealed class TrackAttribute<TContext>(
     private ImmutableGlobalOptions? _actionOptions;
     private readonly Lock _lock = new();
 
-    protected override ImmutableGlobalOptions GetOptions(ActionExecutingContext execContext)
+    protected override ImmutableGlobalOptions GetOptions(ActionExecutingContext execCtx)
     {
         if (_actionOptions is not null)
             return _actionOptions;
@@ -26,7 +26,7 @@ public sealed class TrackAttribute<TContext>(
             if (_actionOptions is not null)
                 return _actionOptions;
 
-            var scopeFactory = execContext.HttpContext.RequestServices.GetRequiredService<IServiceScopeFactory>();
+            var scopeFactory = execCtx.HttpContext.RequestServices.GetRequiredService<IServiceScopeFactory>();
             using var scope = scopeFactory.CreateScope();
 
             var uniqueTables = new HashSet<string>();
@@ -38,14 +38,13 @@ public sealed class TrackAttribute<TContext>(
             foreach (var table in tablesNames)
                 uniqueTables.Add(table);
 
-            var baseOptions = scope.ServiceProvider.GetRequiredService<ImmutableGlobalOptions>();
-            _actionOptions = baseOptions with
+            var options = scope.ServiceProvider.GetRequiredService<ImmutableGlobalOptions>();
+            return _actionOptions = options with
             {
-                CacheControl = cacheControl ?? baseOptions.CacheControl,
+                CacheControl = cacheControl ?? options.CacheControl,
                 Source = sourceId ?? typeof(TContext).GetTypeHashId(),
                 Tables = [.. uniqueTables]
             };
-            return _actionOptions;
         }
     }
 }
