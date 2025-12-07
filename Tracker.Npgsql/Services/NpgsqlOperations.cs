@@ -48,9 +48,19 @@ public sealed class NpgsqlOperations : ISourceOperations, IDisposable
         return null;
     }
 
-    public Task<IEnumerable<DateTimeOffset>> GetLastTimestamp(ReadOnlySpan<string> keys, CancellationToken token)
+    public async Task<DateTimeOffset[]?> GetLastTimestamps(string[] keys, CancellationToken token)
     {
-        throw new NotImplementedException();
+        var timestamps = new List<DateTimeOffset>();
+        foreach (var key in keys)
+        {
+            var timestamp = await GetLastTimestamp(key, token);
+            
+            if (timestamp is null)
+                return null;
+
+            timestamps.Add(timestamp.Value);
+        }
+        return [.. timestamps];
     }
 
     public Task<DateTimeOffset?> GetLastTimestamp(CancellationToken token)
