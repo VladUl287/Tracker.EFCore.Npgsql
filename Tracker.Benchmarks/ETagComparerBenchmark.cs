@@ -34,22 +34,15 @@ public unsafe class ETagComparerBenchmark
 
         var lastTimestampDigitCount = DigitCountLog(LastTimestamp);
 
+        var fullLength = AssemblyBuildTimeString.Length + 2 + lastTimestampDigitCount + Suffix.Length;
+        if (fullLength != incominigEtag.Length)
+        {
+            return BuildETag(fullLength, (AssemblyBuildTimeString, LastTimestamp, Suffix));
+        }
+
         if (!inAssemblyBuildTime.Equals(AssemblyBuildTimeString.AsSpan(), StringComparison.Ordinal))
         {
-            var fullLength = AssemblyBuildTimeString.Length + 2 + lastTimestampDigitCount + Suffix.Length;
-            return string.Create(fullLength, (AssemblyBuildTimeString, LastTimestamp, Suffix), (chars, state) =>
-            {
-                state.AssemblyBuildTimeString.AsSpan().CopyTo(chars);
-                var position = state.AssemblyBuildTimeString.Length;
-                chars[position++] = '-';
-
-                state.LastTimestamp.TryFormat(chars[position..], out var written);
-                position += written;
-
-                chars[position++] = '-';
-
-                state.Suffix.AsSpan().CopyTo(chars[position..]);
-            });
+            return BuildETag(fullLength, (AssemblyBuildTimeString, LastTimestamp, Suffix));
         }
 
         var start = digitCount + 1;
@@ -57,20 +50,7 @@ public unsafe class ETagComparerBenchmark
 
         if (!FastCompareStringToLongSimd(inTicks, LastTimestamp))
         {
-            var fullLength = AssemblyBuildTimeString.Length + 2 + lastTimestampDigitCount + Suffix.Length;
-            return string.Create(fullLength, (AssemblyBuildTimeString, LastTimestamp, Suffix), (chars, state) =>
-            {
-                state.AssemblyBuildTimeString.AsSpan().CopyTo(chars);
-                var position = state.AssemblyBuildTimeString.Length;
-                chars[position++] = '-';
-
-                state.LastTimestamp.TryFormat(chars[position..], out var written);
-                position += written;
-
-                chars[position++] = '-';
-
-                state.Suffix.AsSpan().CopyTo(chars[position..]);
-            });
+            return BuildETag(fullLength, (AssemblyBuildTimeString, LastTimestamp, Suffix));
         }
 
         start += lastTimestampDigitCount + 1;
@@ -78,24 +58,28 @@ public unsafe class ETagComparerBenchmark
 
         if (!inSuffix.Equals(Suffix, StringComparison.Ordinal))
         {
-            var fullLength = AssemblyBuildTimeString.Length + 2 + lastTimestampDigitCount + Suffix.Length;
-            return string.Create(fullLength, (AssemblyBuildTimeString, LastTimestamp, Suffix), (chars, state) =>
-            {
-                state.AssemblyBuildTimeString.AsSpan().CopyTo(chars);
-                var position = state.AssemblyBuildTimeString.Length;
-                chars[position++] = '-';
-
-                state.LastTimestamp.TryFormat(chars[position..], out var written);
-                position += written;
-
-                chars[position++] = '-';
-
-                state.Suffix.AsSpan().CopyTo(chars[position..]);
-            });
+            return BuildETag(fullLength, (AssemblyBuildTimeString, LastTimestamp, Suffix));
         }
 
         return null;
     }
+
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static string BuildETag(int fullLength, (string AsBuldTime, long LastTimestamp, string Suffix) state) =>
+        string.Create(fullLength, state, (chars, state) =>
+        {
+            var position = state.AsBuldTime.Length;
+            state.AsBuldTime.AsSpan().CopyTo(chars);
+            chars[position++] = '-';
+
+            state.LastTimestamp.TryFormat(chars[position..], out var written);
+            position += written;
+            chars[position++] = '-';
+
+            state.Suffix.AsSpan().CopyTo(chars[position..]);
+        });
+
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool FastCompareStringToLongSimd(ReadOnlySpan<char> str, long number)
