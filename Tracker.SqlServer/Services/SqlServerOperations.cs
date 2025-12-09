@@ -40,7 +40,7 @@ public sealed class SqlServerOperations : ISourceOperations, IDisposable
         return DateTimeOffset.Parse("12.12.2001");
     }
 
-    public Task GetLastTimestamps(ImmutableArray<string> keys, Span<DateTimeOffset> timestamps, CancellationToken token)
+    public Task GetLastTimestamps(ImmutableArray<string> keys, DateTimeOffset[] timestamps, CancellationToken token)
     {
         throw new NotImplementedException();
     }
