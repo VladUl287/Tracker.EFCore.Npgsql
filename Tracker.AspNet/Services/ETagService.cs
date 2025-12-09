@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System.Buffers;
-using System.IO.Hashing;
 using System.Runtime.CompilerServices;
 using Tracker.AspNet.Logging;
 using Tracker.AspNet.Models;
@@ -11,7 +10,8 @@ using Tracker.Core.Services.Contracts;
 namespace Tracker.AspNet.Services;
 
 public class ETagService(
-    IETagGenerator etagGenerator, ISourceOperationsResolver operationsResolver, ILogger<ETagService> logger) : IETagService
+    IETagGenerator etagGenerator, ISourceOperationsResolver operationsResolver, ITimestampsHasher timestampsHasher,
+    ILogger<ETagService> logger) : IETagService
 {
     public async Task<bool> TrySetETagAsync(HttpContext ctx, ImmutableGlobalOptions options, CancellationToken token)
     {
@@ -26,7 +26,7 @@ public class ETagService(
             var tm = await sourceOperations.GetLastTimestamp(token);
             ltValue = tm.Ticks;
         }
-        else if(options is { Tables.Length: 1 })
+        else if (options is { Tables.Length: 1 })
         {
             var tm = await sourceOperations.GetLastTimestamp(options.Tables[0], token);
             ltValue = tm.Ticks;
@@ -35,12 +35,7 @@ public class ETagService(
         {
             var timestamps = ArrayPool<DateTimeOffset>.Shared.Rent(options.Tables.Length);
             await sourceOperations.GetLastTimestamps(options.Tables, timestamps, token);
-
-            var hash = new XxHash32();
-            foreach (var tmsmp in timestamps.AsSpan()[..options.Tables.Length])
-                hash.Append(BitConverter.GetBytes(tmsmp.Ticks));
-            ltValue = hash.GetCurrentHashAsUInt32();
-
+            ltValue = timestampsHasher.Hash(timestamps);
             ArrayPool<DateTimeOffset>.Shared.Return(timestamps);
         }
 

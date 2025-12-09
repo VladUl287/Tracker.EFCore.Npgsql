@@ -5,6 +5,8 @@ using System.Reflection;
 using Tracker.AspNet.Models;
 using Tracker.AspNet.Services;
 using Tracker.AspNet.Services.Contracts;
+using Tracker.Core.Services;
+using Tracker.Core.Services.Contracts;
 
 namespace Tracker.AspNet.Extensions;
 
@@ -16,6 +18,8 @@ public static class SerivceCollectionExtensions
     public static IServiceCollection AddTracker(this IServiceCollection services, GlobalOptions options)
     {
         ArgumentNullException.ThrowIfNull(options, nameof(options));
+
+        services.AddSingleton<ITimestampsHasher, Fnv1aTimstampsHasher>();
 
         services.AddSingleton<IOptionsBuilder<GlobalOptions, ImmutableGlobalOptions>, GlobalOptionsBuilder>();
 
