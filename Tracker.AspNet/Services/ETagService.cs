@@ -20,10 +20,15 @@ public class ETagService(
 
         var sourceOperations = GetOperationsProvider(ctx, options, operationsResolver);
 
-        var ltValue = 0L;
+        long ltValue;
         if (options is { Tables.Length: 0 })
         {
             var tm = await sourceOperations.GetLastTimestamp(token);
+            ltValue = tm.Ticks;
+        }
+        else if(options is { Tables.Length: 1 })
+        {
+            var tm = await sourceOperations.GetLastTimestamp(options.Tables[0], token);
             ltValue = tm.Ticks;
         }
         else
