@@ -10,38 +10,50 @@ public sealed class XxHash64Hasher : ITimestampsHasher
 {
     public ulong Hash(ReadOnlySpan<DateTimeOffset> timestamps)
     {
-        const int BufferSizeThreshold = 128;
+        const int StackAllocThreshold = 128;
 
-        var bufferSize = timestamps.Length * sizeof(long);
+        var byteCount = timestamps.Length * sizeof(long);
+
         if (BitConverter.IsLittleEndian)
         {
+            if (byteCount > StackAllocThreshold)
+            {
+                var rented = ArrayPool<long>.Shared.Rent(timestamps.Length);
+                Span<long> ticksBuffer = rented.AsSpan(0, timestamps.Length);
+
+                for (int i = 0; i < timestamps.Length; i++)
+                    ticksBuffer[i] = timestamps[i].Ticks;
+
+                var hash = XxHash64.HashToUInt64(MemoryMarshal.AsBytes(ticksBuffer));
+                ArrayPool<long>.Shared.Return(rented);
+                return hash;
+            }
+
             Span<long> ticks = stackalloc long[timestamps.Length];
             for (int i = 0; i < timestamps.Length; i++)
                 ticks[i] = timestamps[i].Ticks;
-
             return XxHash64.HashToUInt64(MemoryMarshal.AsBytes(ticks));
         }
 
-        if (bufferSize >= BufferSizeThreshold)
+        if (byteCount > StackAllocThreshold)
         {
-            var arr = ArrayPool<byte>.Shared.Rent(bufferSize);
-            Span<byte> bufferArr = arr.AsSpan();
+            var rented = ArrayPool<byte>.Shared.Rent(byteCount);
+            Span<byte> ticks = rented.AsSpan(0, timestamps.Length);
 
             for (int i = 0; i < timestamps.Length; i++)
                 BinaryPrimitives.WriteInt64LittleEndian(
-                    bufferArr.Slice(i * sizeof(long), sizeof(long)),
+                    ticks.Slice(i * sizeof(long), sizeof(long)),
                     timestamps[i].Ticks);
 
-            ArrayPool<byte>.Shared.Return(arr);
-            return XxHash64.HashToUInt64(bufferArr);
+            ArrayPool<byte>.Shared.Return(rented);
+            return XxHash64.HashToUInt64(ticks);
         }
 
-        Span<byte> buffer = stackalloc byte[bufferSize];
+        Span<byte> buffer = stackalloc byte[byteCount];
         for (int i = 0; i < timestamps.Length; i++)
             BinaryPrimitives.WriteInt64LittleEndian(
                 buffer.Slice(i * sizeof(long), sizeof(long)),
                 timestamps[i].Ticks);
-
         return XxHash64.HashToUInt64(buffer);
     }
 }
