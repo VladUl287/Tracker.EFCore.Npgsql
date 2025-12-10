@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using Tracker.AspNet.Services.Contracts;
 using Tracker.Core.Extensions;
-using Tracker.Core.Utils;
 
 namespace Tracker.AspNet.Services;
 
@@ -11,13 +10,13 @@ public class ETagService(Assembly executionAssembly) : IETagService
 
     public string AssemblyBuildTimeTicks => _assemblyBuildTimeTicks;
 
-    public bool EqualsTo(int fullLength, string srcETag, ulong lastTimestamp, string suffix)
+    public bool EqualsTo(string ifNoneMatch, int fullLength, ulong lastTimestamp, string suffix)
     {
-        if (fullLength != srcETag.Length)
+        if (fullLength != ifNoneMatch.Length)
             return false;
 
-        var ltDigitCount = UlongUtils.DigitCount(lastTimestamp);
-        var incomingETag = srcETag.AsSpan();
+        var ltDigitCount = lastTimestamp.CountDigits();
+        var incomingETag = ifNoneMatch.AsSpan();
         var rightEdge = _assemblyBuildTimeTicks.Length;
         var inAsBuildTime = incomingETag[..rightEdge];
         if (!inAsBuildTime.Equals(_assemblyBuildTimeTicks.AsSpan(), StringComparison.Ordinal))
