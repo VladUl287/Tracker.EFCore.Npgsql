@@ -65,9 +65,9 @@ public sealed class RequestHandler(
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static ISourceOperations GetOperationsProvider(HttpContext ctx, ImmutableGlobalOptions opt, ISourceOperationsResolver resolver) =>
-        resolver.TryResolve(opt.Source) ?? 
-        opt.SourceOperations ?? 
+        resolver.TryResolve(opt.Source) ??
+        opt.SourceOperations ??
         opt.SourceOperationsFactory?.Invoke(ctx) ??
-        resolver.First ?? 
+        resolver.First ??
         throw new NullReferenceException($"Source operations provider not found. TraceId - '{ctx.TraceIdentifier}'");
 }

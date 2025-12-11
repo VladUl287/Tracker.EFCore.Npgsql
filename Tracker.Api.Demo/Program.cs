@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Tracker.Api.Demo.Database;
-using Tracker.Api.Demo.Database.Entities;
 using Tracker.AspNet.Extensions;
 using Tracker.Npgsql.Extensions;
 using Tracker.SqlServer.Extensions;

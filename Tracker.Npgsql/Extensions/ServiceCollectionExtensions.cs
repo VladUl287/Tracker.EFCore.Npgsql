@@ -20,7 +20,7 @@ public static class ServiceCollectionExtensions
             var connectionString = dbContext.Database.GetConnectionString() ??
                 throw new NullReferenceException($"Connection string is not found for context {typeof(TContext).FullName}.");
 
-            var sourceIdGenerator= scope.ServiceProvider.GetRequiredService<ISourceIdGenerator>();
+            var sourceIdGenerator = scope.ServiceProvider.GetRequiredService<ISourceIdGenerator>();
             var sourceId = sourceIdGenerator.GenerateId<TContext>();
 
             return new NpgsqlOperations(sourceId, connectionString);
@@ -31,7 +31,7 @@ public static class ServiceCollectionExtensions
          where TContext : DbContext
     {
         ArgumentException.ThrowIfNullOrEmpty(sourceId);
-        
+
         return services.AddSingleton<ISourceOperations>((provider) =>
         {
             using var scope = provider.CreateScope();

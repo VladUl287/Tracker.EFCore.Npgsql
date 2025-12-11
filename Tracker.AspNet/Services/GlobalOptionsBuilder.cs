@@ -57,7 +57,7 @@ public sealed class GlobalOptionsBuilder(IServiceScopeFactory scopeFactory) : IO
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static string ResolveCacheControl(GlobalOptions options) => 
+    private static string ResolveCacheControl(GlobalOptions options) =>
         options.CacheControl ?? options.CacheControlBuilder?.Combine() ?? _defaultCacheControl;
 
     private static ImmutableArray<string> GetAndCombineTablesNames<TContext>(

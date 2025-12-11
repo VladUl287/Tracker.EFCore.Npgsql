@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
-using Tracker.Core.Extensions;
 using System.Runtime.CompilerServices;
 using Tracker.AspNet.Services.Contracts;
+using Tracker.Core.Extensions;
 
 namespace Tracker.AspNet.Services;
 

@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using System;
-using System.Buffers.Binary;
+﻿using System.Buffers.Binary;
 using Tracker.Core.Services;
 
 namespace Tracker.Tests;
