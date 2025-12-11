@@ -145,6 +145,11 @@ public sealed class NpgsqlOperations : ISourceOperations, IDisposable
         _disposed = true;
     }
 
+    public Task<bool> SetLastTimestamp(string key, DateTimeOffset value, CancellationToken token)
+    {
+        throw new NotImplementedException();
+    }
+
     ~NpgsqlOperations()
     {
         Dispose(disposing: false);

@@ -103,6 +103,11 @@ public sealed class SqlServerOperations : ISourceOperations, IDisposable
         throw new NotImplementedException();
     }
 
+    public Task<bool> SetLastTimestamp(string key, DateTimeOffset value, CancellationToken token)
+    {
+        throw new NotImplementedException();
+    }
+
     ~SqlServerOperations()
     {
         Dispose(disposing: false);
