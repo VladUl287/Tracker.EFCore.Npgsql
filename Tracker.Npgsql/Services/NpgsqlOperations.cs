@@ -94,7 +94,7 @@ public sealed class NpgsqlOperations : ISourceOperations, IDisposable
         using var reader = await command.ExecuteReaderAsync(CommandBehavior.SingleRow, token);
 
         if (await reader.ReadAsync(token))
-            return await reader.GetFieldValueAsync<DateTimeOffset?>(0, token) 
+            return await reader.GetFieldValueAsync<DateTimeOffset?>(0, token)
                 ?? throw new NullReferenceException($"Not able to resolve timestamp for table '{key}'");
 
         throw new InvalidOperationException($"Not able to resolve timestamp for table '{key}'");
@@ -117,9 +117,14 @@ public sealed class NpgsqlOperations : ISourceOperations, IDisposable
         using var reader = await command.ExecuteReaderAsync(CommandBehavior.SingleRow, token);
 
         if (await reader.ReadAsync(token))
-            return await reader.GetFieldValueAsync<DateTimeOffset?>(1, token)
-                ?? throw new NullReferenceException("Not able to resolve pg_last_committed_xact");
-
+        {
+            var result = await reader.GetFieldValueAsync<object[]?>(0, token);
+            if (result is { Length: > 0 })
+            {
+                return (DateTime)result[1];
+            }
+            return default;
+        }
         throw new InvalidOperationException("Not able to resolve pg_last_committed_xact");
     }
 
