@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Tracker.AspNet.Logging;
 using Tracker.AspNet.Models;
@@ -10,45 +11,49 @@ namespace Tracker.AspNet.Services;
 
 public sealed class DefaultRequestFilter(ILogger<DefaultRequestFilter> logger) : IRequestFilter
 {
-    public bool RequestValid(HttpContext context, ImmutableGlobalOptions options)
+    public bool RequestValid(HttpContext ctx, ImmutableGlobalOptions options)
     {
-        if (!HttpMethods.IsGet(context.Request.Method))
+        logger.LogFilterStarted(ctx.TraceIdentifier, ctx.Request.Path);
+
+        if (!HttpMethods.IsGet(ctx.Request.Method))
         {
-            logger.LogNotGetRequest(context.Request.Method, context.Request.Path);
+            logger.LogNotGetRequest(ctx.Request.Method, ctx.TraceIdentifier);
             return false;
         }
 
-        if (context.Response.Headers.ETag.Count > 0)
+        if (ctx.Response.Headers.ETag.Count > 0)
         {
-            logger.LogEtagHeaderPresent(context.Request.Path);
+            logger.LogEtagHeaderPresented(ctx.TraceIdentifier);
             return false;
         }
 
-        if (HasNotValidCacheControl(context.Request.Headers.CacheControl))
+        if (AnyInvalidCacheControl(ctx.Request.Headers.CacheControl, out var reqDirective))
         {
-            logger.LogNotValidCacheControlDirective(context.TraceIdentifier);
+            logger.LogRequestNotValidCacheControlDirective(reqDirective, ctx.TraceIdentifier);
             return false;
         }
 
-        if (HasNotValidCacheControl(context.Response.Headers.CacheControl))
+        if (AnyInvalidCacheControl(ctx.Response.Headers.CacheControl, out var resDirective))
         {
-            logger.LogNotValidCacheControlDirective(context.TraceIdentifier);
+            logger.LogResponseNotValidCacheControlDirective(resDirective, ctx.TraceIdentifier);
             return false;
         }
 
-        if (!options.Filter(context))
+        if (!options.Filter(ctx))
         {
-            logger.LogFilterRejected(context.Request.Path);
+            logger.LogFilterRejected(ctx.TraceIdentifier);
             return false;
         }
 
-        logger.LogRequestValidated(context.Request.Path);
+        logger.LogContextFilterFinished(ctx.TraceIdentifier);
         return true;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool HasNotValidCacheControl(StringValues cacheControlHeaders)
+    private static bool AnyInvalidCacheControl(StringValues cacheControlHeaders, [NotNullWhen(true)] out string? directive)
     {
+        directive = null;
+
         if (cacheControlHeaders.Count == 0)
             return false;
 
@@ -56,10 +61,20 @@ public sealed class DefaultRequestFilter(ILogger<DefaultRequestFilter> logger) :
         const string NO_STORE = "no-store";
         foreach (var header in cacheControlHeaders)
         {
-            if (header != null && (
-                header.Contains(IMMUTABLE, StringComparison.OrdinalIgnoreCase) ||
-                header.Contains(NO_STORE, StringComparison.OrdinalIgnoreCase)))
+            if (header is null)
+                continue;
+
+            if (header.Contains(IMMUTABLE, StringComparison.OrdinalIgnoreCase))
+            {
+                directive = IMMUTABLE;
                 return true;
+            }
+
+            if (header.Contains(NO_STORE, StringComparison.OrdinalIgnoreCase))
+            {
+                directive = NO_STORE;
+                return true;
+            }
         }
 
         return false;
