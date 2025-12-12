@@ -4,7 +4,7 @@ using System.IO.Hashing;
 using System.Text;
 using Tracker.Core.Services.Contracts;
 
-namespace Tracker.AspNet.Services;
+namespace Tracker.Core.Services;
 
 public sealed class DefaultSourceIdGenerator : ISourceIdGenerator
 {

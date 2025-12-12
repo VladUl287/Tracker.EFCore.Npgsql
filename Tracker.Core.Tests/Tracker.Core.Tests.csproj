@@ -17,6 +17,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\Tracker.AspNet\Tracker.AspNet.csproj" />
 		<ProjectReference Include="..\Tracker.Core\Tracker.Core.csproj" />
 	</ItemGroup>
 
