@@ -66,9 +66,21 @@ public sealed class SqlServerOperations : ISourceOperations, IDisposable
             timestamps[i] = await GetLastTimestamp(keys[i], token);
     }
 
-    public Task<DateTimeOffset> GetLastTimestamp(CancellationToken token)
+    public async Task<DateTimeOffset> GetLastTimestamp(CancellationToken token)
     {
-        throw new NotImplementedException();
+        const string query = $"""
+            SELECT MAX(last_user_update)
+            FROM sys.dm_db_index_usage_stats
+            WHERE database_id = DB_ID();
+            """;
+
+        await using var command = _dataSource.CreateCommand(query);
+
+        using var reader = await command.ExecuteReaderAsync(CommandBehavior.SingleRow, token);
+        if (await reader.ReadAsync(token))
+            return await reader.GetFieldValueAsync<DateTime?>(0, token) ?? default;
+
+        throw new InvalidOperationException($"Not able to get last timestamp for database");
     }
 
     public void Dispose()
