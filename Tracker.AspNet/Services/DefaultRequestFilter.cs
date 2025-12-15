@@ -34,13 +34,13 @@ public sealed class DefaultRequestFilter(ILogger<DefaultRequestFilter> logger) :
             return false;
         }
 
-        if (AnyInvalidCacheControl(ctx.Request.Headers.CacheControl, _invalidRequestDirectives, out var reqDirective))
+        if (AnyInvalidDirective(ctx.Request.Headers.CacheControl, _invalidRequestDirectives, out var reqDirective))
         {
             logger.LogRequestNotValidCacheControlDirective(reqDirective, ctx.TraceIdentifier);
             return false;
         }
 
-        if (AnyInvalidCacheControl(ctx.Response.Headers.CacheControl, _invalidResponseDirectives, out var resDirective))
+        if (AnyInvalidDirective(ctx.Response.Headers.CacheControl, _invalidResponseDirectives, out var resDirective))
         {
             logger.LogResponseNotValidCacheControlDirective(resDirective, ctx.TraceIdentifier);
             return false;
@@ -57,7 +57,7 @@ public sealed class DefaultRequestFilter(ILogger<DefaultRequestFilter> logger) :
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool AnyInvalidCacheControl(
+    public static bool AnyInvalidDirective(
         StringValues headers, ReadOnlySpan<string> invalidDirectives, [NotNullWhen(true)] out string? directive)
     {
         directive = null;
