@@ -7,14 +7,18 @@ using Tracker.Core.Services.Contracts;
 namespace Tracker.Core.Services;
 
 /// <summary>
-/// Implementation of <see cref="IETagProvider"/> that uses assembly timestamp
-/// for versioning and supports optional suffix for content-based ETags.
+/// Implementation of <see cref="IETagProvider"/> that uses assembly timestamp, entity timestamp, and an optional suffix
+/// for versioning.
 /// </summary>
 /// <remarks>
-/// This implementation uses <see cref="string.Create{TState}(int, TState, System.Buffers.SpanAction{char, TState})"/> for efficient string
-/// construction and span-based operations for comparison to minimize allocations.
+/// The ETag format is: {assemblyTimestamp}-{entityTimestamp}[-{suffix}]
+/// where:<br/>
+/// - assemblyTimestamp is obtained from <see cref="IAssemblyTimestampProvider"/><br/>
+/// - entityTimestamp is the last modified timestamp of the entity<br/>
+/// - suffix is an optional identifier (e.g., content hash, version identifier)<br/>
+/// The suffix is optional and only included when provided.
 /// </remarks>
-public sealed class ETagProvider(IAssemblyTimestampProvider assemblyTimestampProvider) : IETagProvider
+public sealed class DefaultETagProvider(IAssemblyTimestampProvider assemblyTimestampProvider) : IETagProvider
 {
     private readonly string _assemblyTimestamp = assemblyTimestampProvider.GetWriteTime().Ticks.ToString();
 
@@ -53,7 +57,14 @@ public sealed class ETagProvider(IAssemblyTimestampProvider assemblyTimestampPro
         return suffixSegment.Equals(suffix, StringComparison.Ordinal);
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Generates an ETag based on the assembly timestamp, entity's last modified timestamp and an optional suffix.
+    /// </summary>
+    /// <param name="lastTimestamp">The last modified timestamp of the entity.</param>
+    /// <param name="suffix">Optional suffix to include in the ETag (e.g., content hash).</param>
+    /// <returns>
+    /// ETag as string in the format: {assemblyTimestamp}-{lastTimestamp}[-{suffix}]
+    /// </returns>
     public string Generate(ulong lastTimestamp, string suffix)
     {
         var timestampDigitCount = lastTimestamp.CountDigits();
@@ -90,9 +101,6 @@ public sealed class ETagProvider(IAssemblyTimestampProvider assemblyTimestampPro
     /// <remarks>
     /// Calculation formula: assemblyTimestamp.Length + timestampDigitCount + suffixLength + separatorCount
     /// where separatorCount is 2 if suffixLength > 0 (two hyphens), otherwise 1 (one hyphen).
-    /// 
-    /// Marked with <see cref="MethodImplOptions.AggressiveInlining"/> for performance optimization
-    /// as this is called in hot paths.
     /// </remarks>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal int CalculateEtagLength(int timestampDigitCount, int suffixLength)

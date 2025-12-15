@@ -28,7 +28,7 @@ public class ETagProviderTests
         var assembly = _mockAssembly.Object;
 
         // Act
-        var service = new ETagProvider(assembly);
+        var service = new DefaultETagProvider(assembly);
 
         // Assert - We can't directly test private field, but we can test its effect
         Assert.NotNull(service);
@@ -42,7 +42,7 @@ public class ETagProviderTests
     public void Build_ShouldCreateCorrectETag(ulong lastTimestamp, string suffix, string expectedBody)
     {
         // Arrange
-        var service = new ETagProvider(_mockAssembly.Object);
+        var service = new DefaultETagProvider(_mockAssembly.Object);
         var expectedETag = _fixedAssemblyTicks + "-" + expectedBody;
 
         // Act
@@ -56,7 +56,7 @@ public class ETagProviderTests
     public void Build_WithZeroTimestampAndEmptySuffix_ShouldCreateCorrectETag()
     {
         // Arrange
-        var service = new ETagProvider(_mockAssembly.Object);
+        var service = new DefaultETagProvider(_mockAssembly.Object);
         var expected = _fixedAssemblyTicks + "-0";
 
         // Act
@@ -74,7 +74,7 @@ public class ETagProviderTests
     public void EqualsTo_ShouldReturnCorrectResult(ulong lastTimestamp, string suffix, bool shouldMatch)
     {
         // Arrange
-        var service = new ETagProvider(_mockAssembly.Object);
+        var service = new DefaultETagProvider(_mockAssembly.Object);
         var etag = service.Generate(lastTimestamp, suffix);
         var wrongSuffix = shouldMatch ? suffix : "wrong" + suffix;
 
@@ -89,14 +89,14 @@ public class ETagProviderTests
     public void EqualsTo_WithWrongAssemblyTime_ShouldReturnFalse()
     {
         // Arrange
-        var service = new ETagProvider(_mockAssembly.Object);
+        var service = new DefaultETagProvider(_mockAssembly.Object);
         var etag = service.Generate(123UL, "test");
 
         // Create a different assembly time
         var differentTime = new DateTime(2024, 1, 2, 12, 0, 0, DateTimeKind.Utc);
         var differentMockAssembly = new Mock<IAssemblyTimestampProvider>();
         differentMockAssembly.Setup(a => a.GetWriteTime()).Returns(differentTime);
-        var differentService = new ETagProvider(differentMockAssembly.Object);
+        var differentService = new DefaultETagProvider(differentMockAssembly.Object);
 
         // Act
         var result = differentService.Compare(etag, 123UL, "test");
@@ -113,7 +113,7 @@ public class ETagProviderTests
     public void EqualsTo_WithInvalidLengthETag_ShouldReturnFalse(string invalidEtag)
     {
         // Arrange
-        var service = new ETagProvider(_mockAssembly.Object);
+        var service = new DefaultETagProvider(_mockAssembly.Object);
 
         // Act
         var result = service.Compare(invalidEtag, 123UL, "test");
@@ -126,7 +126,7 @@ public class ETagProviderTests
     public void EqualsTo_WithWrongTimestamp_ShouldReturnFalse()
     {
         // Arrange
-        var service = new ETagProvider(_mockAssembly.Object);
+        var service = new DefaultETagProvider(_mockAssembly.Object);
         var etag = service.Generate(123UL, "test");
 
         // Act
@@ -140,7 +140,7 @@ public class ETagProviderTests
     public void EqualsTo_WithEmptySuffixAndValidEtag_ShouldReturnTrue()
     {
         // Arrange
-        var service = new ETagProvider(_mockAssembly.Object);
+        var service = new DefaultETagProvider(_mockAssembly.Object);
         var etag = service.Generate(123UL, "");
 
         // Act
@@ -154,7 +154,7 @@ public class ETagProviderTests
     public void EqualsTo_WithNullEtag_ShouldReturnFalse()
     {
         // Arrange
-        var service = new ETagProvider(_mockAssembly.Object);
+        var service = new DefaultETagProvider(_mockAssembly.Object);
 
         // Act & Assert
         Assert.Throws<NullReferenceException>(() =>
@@ -165,7 +165,7 @@ public class ETagProviderTests
     public void EqualsTo_WithCorrectEtagButDifferentCasing_ShouldReturnFalse()
     {
         // Arrange
-        var service = new ETagProvider(_mockAssembly.Object);
+        var service = new DefaultETagProvider(_mockAssembly.Object);
         var etag = service.Generate(123UL, "TestSuffix");
         var uppercaseEtag = etag.ToUpperInvariant();
 
@@ -186,7 +186,7 @@ public class ETagProviderTests
     public void Build_WithVariousTimestamps_ShouldHaveCorrectLength(ulong timestamp, int expectedDigitCount)
     {
         // Arrange
-        var service = new ETagProvider(_mockAssembly.Object);
+        var service = new DefaultETagProvider(_mockAssembly.Object);
         var suffix = "test";
         var expectedLength = _fixedAssemblyTicks.Length + expectedDigitCount + suffix.Length + 2;
 
@@ -201,7 +201,7 @@ public class ETagProviderTests
     public void Build_And_EqualsTo_ShouldBeSymmetric()
     {
         // Arrange
-        var service = new ETagProvider(_mockAssembly.Object);
+        var service = new DefaultETagProvider(_mockAssembly.Object);
         var testCases = new[]
         {
             (123UL, "suffix1"),
@@ -226,8 +226,8 @@ public class ETagProviderTests
     public void ComputeLength_PrivateMethod_EdgeCases()
     {
         // Note: This test requires using reflection to test the private method
-        var service = new ETagProvider(_mockAssembly.Object);
-        var method = typeof(ETagProvider).GetMethod("ComputeLength",
+        var service = new DefaultETagProvider(_mockAssembly.Object);
+        var method = typeof(DefaultETagProvider).GetMethod("ComputeLength",
             BindingFlags.NonPublic | BindingFlags.Instance);
 
         // Test with empty suffix
