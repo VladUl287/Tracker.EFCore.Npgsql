@@ -14,41 +14,42 @@ public sealed class DefaultRequestFilter(IDirectiveChecker directiveChecker, ILo
 {
     public bool RequestValid(HttpContext ctx, ImmutableGlobalOptions options)
     {
-        logger.LogFilterStarted(ctx.TraceIdentifier, ctx.Request.Path);
+        var traceId = new TraceId(ctx);
 
+        logger.LogFilterStarted(traceId, ctx.Request.Path);
         if (!HttpMethods.IsGet(ctx.Request.Method))
         {
-            logger.LogNotGetRequest(ctx.Request.Method, ctx.TraceIdentifier);
+            logger.LogNotGetRequest(ctx.Request.Method, traceId);
             return false;
         }
 
         if (ctx.Response.Headers.ETag.Count > 0)
         {
-            logger.LogEtagHeaderPresented(ctx.TraceIdentifier);
+            logger.LogEtagHeaderPresented(traceId);
             return false;
         }
 
         var defaultRequestDirectives = directiveChecker.DefaultInvalidRequestDirectives;
         if (directiveChecker.AnyInvalidDirective(ctx.Request.Headers.CacheControl, defaultRequestDirectives, out var reqDirective))
         {
-            logger.LogRequestNotValidCacheControlDirective(reqDirective, ctx.TraceIdentifier);
+            logger.LogRequestNotValidCacheControlDirective(reqDirective, traceId);
             return false;
         }
 
         var defaultResponseDirectives = directiveChecker.DefaultInvalidResponseDirectives;
         if (directiveChecker.AnyInvalidDirective(ctx.Response.Headers.CacheControl, defaultResponseDirectives, out var resDirective))
         {
-            logger.LogResponseNotValidCacheControlDirective(resDirective, ctx.TraceIdentifier);
+            logger.LogResponseNotValidCacheControlDirective(resDirective, traceId);
             return false;
         }
 
         if (!options.Filter(ctx))
         {
-            logger.LogFilterRejected(ctx.TraceIdentifier);
+            logger.LogFilterRejected(traceId);
             return false;
         }
 
-        logger.LogContextFilterFinished(ctx.TraceIdentifier);
+        logger.LogContextFilterFinished(traceId);
         return true;
     }
 }
