@@ -6,10 +6,6 @@ using Tracker.AspNet.Services.Contracts;
 
 namespace Tracker.AspNet.Services;
 
-/// <summary>
-/// Basic implementation of <see cref="IRequestFilter"/> which determines whether ETag generation and comparison are permitted based on context data, 
-/// configured options, and HTTP specification compliance requirements.
-/// </summary>
 public sealed class DefaultRequestFilter(IDirectiveChecker directiveChecker, ILogger<DefaultRequestFilter> logger) : IRequestFilter
 {
     public bool RequestValid(HttpContext ctx, ImmutableGlobalOptions opts)
