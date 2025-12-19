@@ -76,7 +76,6 @@ public sealed class NpgsqlOperations : ISourceOperations, IDisposable
             await reader.GetFieldValueAsync<bool>(0, token);
     }
 
-    //TODO: Fix unpredictable result not existing table name(maybe error message bytes pased?)
     public async ValueTask<long> GetLastVersion(string key, CancellationToken token = default)
     {
         const string GetTimestampQuery = "SELECT get_last_timestamp(@table_name);";
@@ -85,7 +84,10 @@ public sealed class NpgsqlOperations : ISourceOperations, IDisposable
 
         using var reader = await command.ExecuteReaderAsync(CommandBehavior.SingleRow, token);
         if (await reader.ReadAsync(token))
+        {
+            var test = reader.HasRows;
             return reader.GetTimestampTicks(0);
+        }
 
         throw new InvalidOperationException($"Not able to resolve timestamp for table '{key}'");
     }
