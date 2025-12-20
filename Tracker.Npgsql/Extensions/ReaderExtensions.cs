@@ -2,8 +2,6 @@
 using System.Data.Common;
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("Tracker.Npgsql.Tests")]
-
 namespace Tracker.Npgsql.Extensions;
 
 internal static class ReaderExtensions
