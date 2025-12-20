@@ -136,18 +136,11 @@ public sealed class SqlServerChangeTrackingOperations : ISourceOperations, IDisp
 
         await using var command = _dataSource.CreateCommand(disableTrackingQuery);
 
-        try
-        {
-            await using var reader = await command.ExecuteReaderAsync(CommandBehavior.SingleRow, token);
-            if (await reader.ReadAsync(token))
-                return reader.GetInt32(0) > 0;
+        await using var reader = await command.ExecuteReaderAsync(CommandBehavior.SingleRow, token);
+        if (await reader.ReadAsync(token))
+            return reader.GetInt32(0) > 0;
 
-            throw new InvalidOperationException("Unable to disable change tracking for table.");
-        }
-        catch (SqlException ex)
-        {
-            throw new InvalidOperationException(ex.Message);
-        }
+        throw new InvalidOperationException("Unable to disable change tracking for table.");
     }
 
     public ValueTask<bool> SetLastVersion(string key, long version, CancellationToken token = default) =>
