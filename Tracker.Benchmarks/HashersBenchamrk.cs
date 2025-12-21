@@ -8,7 +8,7 @@ public class HashersBenchamrk
 {
     private static readonly long[] _dateTimestamps = [.. Enumerable.Range(0, 5).Select(i => DateTimeOffset.UtcNow.AddDays(i).Ticks)];
 
-    public static XxHash64Hasher XxHash64Hasher = new();
+    public static DefaultTrackerHasher XxHash64Hasher = new();
 
     [Benchmark]
     public ulong XxHash64_Hasher()

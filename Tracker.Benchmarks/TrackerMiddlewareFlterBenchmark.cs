@@ -28,7 +28,7 @@ public class TrackerMiddlewareFlterBenchmark
     {
         var etagProvider = new DefaultETagProvider(new BenchAssemblyProvider());
         var sourceOpeationsResolver = new SourceOperationsResolver([new BenchmarkOperationsProvider()]);
-        var timestampHasher = new XxHash64Hasher();
+        var timestampHasher = new DefaultTrackerHasher();
 
         var loggerFactory = LoggerFactory.Create(builder =>
         {

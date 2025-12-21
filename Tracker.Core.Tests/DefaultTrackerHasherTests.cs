@@ -3,9 +3,9 @@ using Tracker.Core.Services;
 
 namespace Tracker.Core.Tests;
 
-public class XxHash64HasherTests
+public class DefaultTrackerHasherTests
 {
-    private readonly XxHash64Hasher _hasher = new();
+    private readonly DefaultTrackerHasher _hasher = new();
 
     [Fact]
     public void Hash_EmptySpan_ReturnsValidHash()
@@ -17,8 +17,8 @@ public class XxHash64HasherTests
         var hash = _hasher.Hash(timestamps);
 
         // Assert
-        // XXHash64 of empty data is 0xEF46DB3751D8E999 (seed 0)
-        Assert.Equal(0xEF46DB3751D8E999UL, hash);
+        var expected = CalculateExpectedHash([]);
+        Assert.Equal(expected, hash);
     }
 
     [Fact]
@@ -192,7 +192,7 @@ public class XxHash64HasherTests
             BinaryPrimitives.WriteInt64LittleEndian(span, ticks);
         }
 
-        return System.IO.Hashing.XxHash64.HashToUInt64(buffer);
+        return System.IO.Hashing.XxHash3.HashToUInt64(buffer);
     }
 
     public delegate ulong HashMethodDelegate(ReadOnlySpan<long> timestamps);
@@ -210,8 +210,8 @@ public class XxHash64HasherTests
         };
 
         // Get private methods via reflection
-        var hasher = new XxHash64Hasher();
-        var type = typeof(XxHash64Hasher);
+        var hasher = new DefaultTrackerHasher();
+        var type = typeof(DefaultTrackerHasher);
 
         var hashLittleEndianMethod = type.GetMethod("HashLittleEndian",
             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
