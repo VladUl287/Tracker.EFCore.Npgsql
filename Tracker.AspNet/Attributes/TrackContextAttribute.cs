@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using System.Collections.Immutable;
-using Tracker.AspNet.Logging;
 using Tracker.AspNet.Models;
 using Tracker.AspNet.Services.Contracts;
 using Tracker.Core.Extensions;
@@ -36,51 +34,34 @@ public sealed class TrackAttribute<TContext>(
             var serviceProvider = scope.ServiceProvider;
             var options = serviceProvider.GetRequiredService<ImmutableGlobalOptions>();
             var sourceResolver = serviceProvider.GetRequiredService<IProviderResolver>();
-            var logger = serviceProvider.GetRequiredService<ILogger<TrackAttribute<TContext>>>();
 
             _actionOptions = options with
             {
                 CacheControl = cacheControl ?? options.CacheControl,
+                Tables = ResolveTables(tables, entities, serviceProvider, options),
                 SourceProvider = sourceResolver.SelectProvider<TContext>(sourceId, options),
-                Tables = ResolveTables(ctx, tables, entities, serviceProvider, options, logger)
             };
 
-            logger.LogOptionsBuilded(GetActionName(ctx));
             return _actionOptions;
         }
     }
 
     private static ImmutableArray<string> ResolveTables(
-        ActionExecutingContext ctx, string[]? tables, Type[]? entities,
-        IServiceProvider serviceProvider, ImmutableGlobalOptions options, ILogger<TrackAttribute<TContext>> logger)
+        string[]? tables, Type[]? entities, IServiceProvider services, ImmutableGlobalOptions options)
     {
-        var tablesNames = new HashSet<string>();
-
-        foreach (var tableName in tables ?? [])
-        {
-            if (!tablesNames.Add(tableName))
-                logger.LogTableNameDuplicated(tableName, GetActionName(ctx));
-        }
+        var tablesNames = new HashSet<string>(tables ?? []);
 
         if (entities is { Length: > 0 })
         {
-            var dbContext = serviceProvider.GetRequiredService<TContext>();
+            var dbContext = services.GetRequiredService<TContext>();
             foreach (var tableName in dbContext.GetTablesNames(entities))
-            {
-                if (!tablesNames.Add(tableName))
-                    logger.LogTableNameDuplicated(tableName, GetActionName(ctx));
-            }
+                tablesNames.Add(tableName);
         }
 
         if (tables is null && entities is null)
         {
-            logger.LogInformation("");
-
             foreach (var tableName in options.Tables)
-            {
-                if (!tablesNames.Add(tableName))
-                    logger.LogTableNameDuplicated(tableName, GetActionName(ctx));
-            }
+                tablesNames.Add(tableName);
         }
 
         return [.. tablesNames];

@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
-using Tracker.AspNet.Logging;
 using Tracker.AspNet.Models;
 using Tracker.AspNet.Services.Contracts;
 
@@ -34,7 +32,6 @@ public sealed class TrackAttribute(
             var serviceProvider = scope.ServiceProvider;
             var providerSelector = serviceProvider.GetRequiredService<IProviderResolver>();
             var options = serviceProvider.GetRequiredService<ImmutableGlobalOptions>();
-            var logger = serviceProvider.GetRequiredService<ILogger<TrackAttribute>>();
 
             _actionOptions = options with
             {
@@ -43,7 +40,6 @@ public sealed class TrackAttribute(
                 SourceProvider = providerSelector.SelectProvider(sourceId, options),
             };
 
-            logger.LogOptionsBuilded(ctx.ActionDescriptor.DisplayName ?? ctx.ActionDescriptor.Id);
             return _actionOptions;
         }
     }

@@ -31,9 +31,5 @@ public abstract class TrackAttributeBase : Attribute, IAsyncActionFilter
             .GetRequiredService<IRequestHandler>()
             .IsNotModified(httpCtx, options);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    protected static string GetActionName(ActionExecutingContext ctx) =>
-        ctx.ActionDescriptor.DisplayName ?? ctx.ActionDescriptor.Id;
-
     protected internal abstract ImmutableGlobalOptions GetOptions(ActionExecutingContext execContext);
 }
