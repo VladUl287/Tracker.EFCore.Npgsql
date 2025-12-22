@@ -9,7 +9,7 @@ using Tracker.Core.Services.Contracts;
 namespace Tracker.AspNet.Services;
 
 public sealed class DefaultRequestHandler(
-    IETagProvider eTagService, ITrackerHasher timestampsHasher, ILogger<DefaultRequestHandler> logger) : IRequestHandler
+    IETagProvider etagProvider, ITrackerHasher hasher, ILogger<DefaultRequestHandler> logger) : IRequestHandler
 {
     public async ValueTask<bool> IsNotModified(HttpContext ctx, ImmutableGlobalOptions options, CancellationToken token = default)
     {
@@ -34,7 +34,7 @@ public sealed class DefaultRequestHandler(
             if (notModified)
                 return true;
 
-            var etag = eTagService.Generate(lastTimestamp, suffix);
+            var etag = etagProvider.Generate(lastTimestamp, suffix);
             ctx.Response.Headers.CacheControl = options.CacheControl;
             ctx.Response.Headers.ETag = etag;
             logger.LogETagAdded(etag, traceId);
@@ -58,7 +58,7 @@ public sealed class DefaultRequestHandler(
             return false;
 
         suffix = options.Suffix(ctx);
-        if (!eTagService.Compare(ifNoneMatch, lastTimestamp, suffix))
+        if (!etagProvider.Compare(ifNoneMatch, lastTimestamp, suffix))
             return false;
 
         ctx.Response.StatusCode = StatusCodes.Status304NotModified;
@@ -80,7 +80,7 @@ public sealed class DefaultRequestHandler(
             default:
                 var timestamps = ArrayPool<long>.Shared.Rent(options.Tables.Length);
                 await sourceOperations.GetLastVersions(options.Tables, timestamps, token);
-                var hash = timestampsHasher.Hash(timestamps.AsSpan(0, options.Tables.Length));
+                var hash = hasher.Hash(timestamps.AsSpan(0, options.Tables.Length));
                 ArrayPool<long>.Shared.Return(timestamps);
                 return hash;
         }

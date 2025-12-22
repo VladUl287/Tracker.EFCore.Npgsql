@@ -9,11 +9,6 @@ namespace Tracker.AspNet.Attributes;
 
 public abstract class TrackAttributeBase : Attribute, IAsyncActionFilter
 {
-    protected TrackAttributeBase()
-    {
-        Console.WriteLine("builded");
-    }
-
     public async Task OnActionExecutionAsync(ActionExecutingContext execCtx, ActionExecutionDelegate next)
     {
         var options = GetOptions(execCtx);
