@@ -84,10 +84,7 @@ public sealed class NpgsqlOperations : ISourceProvider
 
         using var reader = await command.ExecuteReaderAsync(CommandBehavior.SingleRow, token);
         if (await reader.ReadAsync(token))
-        {
-            var test = reader.HasRows;
             return reader.GetTimestampTicks(0);
-        }
 
         throw new InvalidOperationException($"Not able to resolve timestamp for table '{key}'");
     }
