@@ -35,7 +35,7 @@ public sealed class TrackAttribute<TContext>(
 
             _actionOptions = options with
             {
-                Source = sourceId ?? typeof(TContext).FullName ?? options.Source,
+                ProviderId = sourceId ?? typeof(TContext).FullName ?? options.ProviderId,
                 CacheControl = cacheControl ?? options.CacheControl,
                 Tables = ResolveTables(tables, entities, serviceProvider, options),
             };

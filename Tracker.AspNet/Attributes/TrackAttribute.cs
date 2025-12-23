@@ -33,7 +33,7 @@ public sealed class TrackAttribute(
 
             _actionOptions = options with
             {
-                Source = sourceId ?? options.Source,
+                ProviderId = sourceId ?? options.ProviderId,
                 Tables = ResolveTables(tables, options),
                 CacheControl = cacheControl ?? options.CacheControl,
             };

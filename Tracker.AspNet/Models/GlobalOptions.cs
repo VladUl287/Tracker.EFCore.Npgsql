@@ -7,7 +7,7 @@ namespace Tracker.AspNet.Models;
 
 public sealed class GlobalOptions
 {
-    public string? Source { get; set; }
+    public string? ProviderId { get; set; }
     public ISourceProvider? SourceProvider { get; set; }
     public Func<HttpContext, ISourceProvider>? SourceProviderFactory { get; set; }
 
@@ -26,7 +26,7 @@ public sealed class GlobalOptions
 
 public sealed record ImmutableGlobalOptions
 {
-    public string? Source { get; init; }
+    public string? ProviderId { get; init; }
     public ISourceProvider? SourceProvider { get; init; }
     public Func<HttpContext, ISourceProvider>? SourceProviderFactory { get; init; }
 

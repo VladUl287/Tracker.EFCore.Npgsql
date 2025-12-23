@@ -23,7 +23,7 @@ public sealed class GlobalOptionsBuilder(IServiceScopeFactory scopeFactory) : IO
 
         return new ImmutableGlobalOptions
         {
-            Source = options.Source,
+            ProviderId = options.ProviderId,
             SourceProvider = options.SourceProvider,
             SourceProviderFactory = options.SourceProviderFactory,
 
@@ -47,7 +47,7 @@ public sealed class GlobalOptionsBuilder(IServiceScopeFactory scopeFactory) : IO
 
         return new ImmutableGlobalOptions
         {
-            Source = options.Source,
+            ProviderId = options.ProviderId,
             SourceProvider = options.SourceProvider,
             SourceProviderFactory = options.SourceProviderFactory,
 

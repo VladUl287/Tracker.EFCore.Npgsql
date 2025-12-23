@@ -19,10 +19,10 @@ public sealed class DefaultProviderResolver(ILogger<DefaultProviderResolver> log
         {
             shouldDispose = false;
 
-            if (options.Source is not null)
+            if (options.ProviderId is not null)
             {
-                logger.LogDebug("Resolving keyed provider: {Source}. TraceId: {TraceId}", options.Source, traceId);
-                return ctx.RequestServices.GetRequiredKeyedService<ISourceProvider>(options.Source);
+                logger.LogDebug("Resolving keyed provider: {Source}. TraceId: {TraceId}", options.ProviderId, traceId);
+                return ctx.RequestServices.GetRequiredKeyedService<ISourceProvider>(options.ProviderId);
             }
 
             if (options.SourceProvider is not null)
