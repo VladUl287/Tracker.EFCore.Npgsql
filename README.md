@@ -6,10 +6,10 @@
 - [ ] Update README with advanced usage
 
 ### 🔧 **Core Features**
+- [ ] Make possible to register source provider not as singleton
 - [ ] **Add track attribute full options support through constructor**
   - [ ] Design new attribute configuration interface
-  - [ ] Add validation logic for all services 
-  - [ ] Make possible to register source provider not as singleton
+  - [ ] Make factory which will create delegate for source provider creation in track attribute options
 
 ### ⚡ **Optimization**
 - [ ] Profile current performance bottlenecks
