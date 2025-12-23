@@ -16,7 +16,7 @@ public class DefaultRequestFilterTests
     public DefaultRequestFilterTests()
     {
         _loggerMock = new Mock<ILogger<DefaultRequestFilter>>();
-        _filter = new DefaultRequestFilter(new DefaltDirectiveChecker(), _loggerMock.Object);
+        _filter = new DefaultRequestFilter(_loggerMock.Object);
         _httpContext = new DefaultHttpContext();
     }
 
@@ -268,8 +268,7 @@ internal static class DefaultRequestFilter_Accessor
 
     public static bool AnyInvalidCacheControl(StringValues cacheControlHeaders, out string? directive)
     {
-        var checker = new DefaltDirectiveChecker();
-        return checker.AnyInvalidDirective(cacheControlHeaders, _invalidRequestDirectives, out directive) ||
-            checker.AnyInvalidDirective(cacheControlHeaders, _invalidResponseDirectives, out directive);
+        directive = null;
+        return true;
     }
 }

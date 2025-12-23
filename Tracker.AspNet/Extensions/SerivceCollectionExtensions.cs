@@ -77,12 +77,10 @@ public static class SerivceCollectionExtensions
 
         services.AddSingleton<IRequestHandler, DefaultRequestHandler>();
 
-        services.AddSingleton<IDirectiveChecker, DefaltDirectiveChecker>();
         services.AddSingleton<IRequestFilter, DefaultRequestFilter>();
 
         services.AddSingleton<IStartupFilter, DefaultProvidersValidator>();
 
         return services;
     }
-
 }

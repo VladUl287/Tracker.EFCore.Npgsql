@@ -40,7 +40,7 @@ public class TrackerMiddlewareFlterBenchmark
             etagProvider, timestampHasher, loggerHandler);
 
         var logger = loggerFactory.CreateLogger<DefaultRequestFilter>();
-        var requestFilter = new DefaultRequestFilter(new DefaltDirectiveChecker(), logger);
+        var requestFilter = new DefaultRequestFilter(logger);
 
         loggerFactory.Dispose();
 
