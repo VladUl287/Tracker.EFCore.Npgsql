@@ -2,9 +2,9 @@
 using System.Reflection.Emit;
 using Tracker.Core.Services;
 
-namespace Tracker.Core.Tests;
+namespace Tracker.Core.Tests.ServicesTests;
 
-public class AssemblyExtensionsTests
+public class AssemblyTimestampProviderTests
 {
     [Fact]
     public void Default_Executing_Assembly()

@@ -1,9 +1,8 @@
 ﻿using Moq;
-using System.Reflection;
 using Tracker.Core.Services;
 using Tracker.Core.Services.Contracts;
 
-namespace Tracker.Core.Tests;
+namespace Tracker.Core.Tests.ServicesTests;
 
 public class ETagProviderTests
 {

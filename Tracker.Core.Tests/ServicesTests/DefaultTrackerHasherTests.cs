@@ -1,7 +1,7 @@
 ﻿using System.Buffers.Binary;
 using Tracker.Core.Services;
 
-namespace Tracker.Core.Tests;
+namespace Tracker.Core.Tests.ServicesTests;
 
 public class DefaultTrackerHasherTests
 {
