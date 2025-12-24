@@ -12,7 +12,7 @@ public class EqualExtensionsTests
         ReadOnlySpan<char> s = "123";
 
         // Act
-        var equal = s.EqualsULong(a);
+        var equal = s.MatchesULong(a);
 
         // Assert
         Assert.True(equal);
@@ -26,7 +26,7 @@ public class EqualExtensionsTests
         ReadOnlySpan<char> s = ulong.MaxValue.ToString();
 
         // Act
-        var equal = s.EqualsULong(a);
+        var equal = s.MatchesULong(a);
 
         // Assert
         Assert.True(equal);
@@ -40,7 +40,7 @@ public class EqualExtensionsTests
         ReadOnlySpan<char> s = ulong.MinValue.ToString();
 
         // Act
-        var equal = s.EqualsULong(a);
+        var equal = s.MatchesULong(a);
 
         // Assert
         Assert.True(equal);
@@ -54,7 +54,7 @@ public class EqualExtensionsTests
         ReadOnlySpan<char> s = "321";
 
         // Act
-        var equal = s.EqualsULong(a);
+        var equal = s.MatchesULong(a);
 
         // Assert
         Assert.False(equal);
@@ -68,7 +68,7 @@ public class EqualExtensionsTests
         ReadOnlySpan<char> s = "12$";
 
         // Act
-        var equal = s.EqualsULong(a);
+        var equal = s.MatchesULong(a);
 
         // Assert
         Assert.False(equal);
@@ -82,7 +82,7 @@ public class EqualExtensionsTests
         ReadOnlySpan<char> s = "1a3";
 
         // Act
-        var equal = s.EqualsULong(a);
+        var equal = s.MatchesULong(a);
 
         // Assert
         Assert.False(equal);
@@ -96,7 +96,7 @@ public class EqualExtensionsTests
         ReadOnlySpan<char> s = "";
 
         // Act
-        var equal = s.EqualsULong(a);
+        var equal = s.MatchesULong(a);
 
         // Assert
         Assert.False(equal);
@@ -110,7 +110,7 @@ public class EqualExtensionsTests
         ReadOnlySpan<char> s = default;
 
         // Act
-        var equal = s.EqualsULong(a);
+        var equal = s.MatchesULong(a);
 
         // Assert
         Assert.False(equal);
@@ -124,7 +124,7 @@ public class EqualExtensionsTests
         ReadOnlySpan<char> s = "1234567891234567891234567891234456789";
 
         // Act
-        var equal = s.EqualsULong(a);
+        var equal = s.MatchesULong(a);
 
         // Assert
         Assert.False(equal);

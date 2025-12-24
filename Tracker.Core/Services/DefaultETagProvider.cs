@@ -24,7 +24,7 @@ public sealed class DefaultETagProvider(IAssemblyTimestampProvider assemblyTimes
             return false;
 
         var timestampSegment = etagSpan.Slice(++position, timestampDigitCount);
-        if (!timestampSegment.EqualsULong(lastTimestamp))
+        if (!timestampSegment.MatchesULong(lastTimestamp))
             return false;
 
         position += timestampDigitCount;
