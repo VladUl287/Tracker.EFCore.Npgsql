@@ -1,8 +1,8 @@
 ﻿using Tracker.Core.Extensions;
 
-namespace Tracker.Core.Tests;
+namespace Tracker.Core.Tests.ExtensionsTests;
 
-public class ULongExtensionsTests
+public class ULongGetDigitCountTests
 {
     public class GetDigitCountTests
     {

@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Tracker.Core.Extensions;
 
-namespace Tracker.Core.Tests;
+namespace Tracker.Core.Tests.ExtensionsTests;
 
 public class DbContextExtensionsTests
 {
