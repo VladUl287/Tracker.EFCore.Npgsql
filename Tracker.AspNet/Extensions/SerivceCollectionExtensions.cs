@@ -77,8 +77,6 @@ public static class SerivceCollectionExtensions
 
         services.AddSingleton<IRequestFilter, DefaultRequestFilter>();
 
-        services.AddSingleton<IStartupFilter, DefaultProvidersValidator>();
-
         services.AddSingleton<IProviderResolver, DefaultProviderResolver>();
 
         return services;
