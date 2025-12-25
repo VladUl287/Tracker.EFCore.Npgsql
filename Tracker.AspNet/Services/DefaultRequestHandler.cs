@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using System.Buffers;
-using Tracker.AspNet.Logging;
+﻿using System.Buffers;
 using Tracker.AspNet.Models;
-using Tracker.AspNet.Services.Contracts;
+using Tracker.AspNet.Logging;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Tracker.Core.Services.Contracts;
+using Tracker.AspNet.Services.Contracts;
 
 namespace Tracker.AspNet.Services;
 
@@ -28,7 +28,7 @@ public sealed class DefaultRequestHandler(
             var notModified = NotModified(ctx, options, traceId, lastTimestamp, out var suffix);
             if (notModified)
             {
-                logger.LogETagAdded("", traceId);
+                logger.LogNotModified(traceId);
                 return true;
             }
 

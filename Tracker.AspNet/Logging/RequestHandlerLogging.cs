@@ -13,6 +13,9 @@ public static partial class RequestHandlerLogging
     [LoggerMessage(Level = LogLevel.Debug, Message = "Resource not modified. TraceId: '{TraceId}'. ETag: {ETag}")]
     public static partial void LogNotModified(this ILogger logger, TraceId traceId, string etag);
 
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Data not modified. Return 304 status code. TraceId: '{TraceId}'")]
+    public static partial void LogNotModified(this ILogger logger, TraceId traceId);
+
     [LoggerMessage(Level = LogLevel.Debug, Message = "ETag added to response: {ETag}. TraceId: '{TraceId}'")]
     public static partial void LogETagAdded(this ILogger logger, string etag, TraceId traceId);
 
