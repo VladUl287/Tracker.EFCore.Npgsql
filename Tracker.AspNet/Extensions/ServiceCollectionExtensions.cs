@@ -9,7 +9,7 @@ using Tracker.Core.Services.Contracts;
 
 namespace Tracker.AspNet.Extensions;
 
-public static class SerivceCollectionExtensions
+public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddTracker(this IServiceCollection services) =>
         services.AddTracker(new GlobalOptions());
