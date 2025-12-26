@@ -23,13 +23,13 @@ public abstract class TrackAttributeBase : Attribute, IAsyncActionFilter
     private static bool RequestValid(HttpContext httpCtx, ImmutableGlobalOptions options) =>
         httpCtx.RequestServices
             .GetRequiredService<IRequestFilter>()
-            .RequestValid(httpCtx, options);
+            .ValidRequest(httpCtx, options);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static ValueTask<bool> NotModified(HttpContext httpCtx, ImmutableGlobalOptions options) =>
         httpCtx.RequestServices
             .GetRequiredService<IRequestHandler>()
-            .IsNotModified(httpCtx, options);
+            .HandleRequest(httpCtx, options);
 
     protected internal abstract ImmutableGlobalOptions GetOptions(ActionExecutingContext execContext);
 }

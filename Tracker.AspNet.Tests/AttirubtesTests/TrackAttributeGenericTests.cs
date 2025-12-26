@@ -269,7 +269,7 @@ public class TrackAttributeGenericTests
         });
 
         SetupServiceProvider();
-        _requestFilterMock.Setup(x => x.RequestValid(_httpContext, It.IsAny<ImmutableGlobalOptions>()))
+        _requestFilterMock.Setup(x => x.ValidRequest(_httpContext, It.IsAny<ImmutableGlobalOptions>()))
             .Returns(false);
 
         // Act
@@ -277,7 +277,7 @@ public class TrackAttributeGenericTests
 
         // Assert
         Assert.True(nextCalled);
-        _requestHandlerMock.Verify(x => x.IsNotModified(It.IsAny<HttpContext>(), It.IsAny<ImmutableGlobalOptions>(), default),
+        _requestHandlerMock.Verify(x => x.HandleRequest(It.IsAny<HttpContext>(), It.IsAny<ImmutableGlobalOptions>(), default),
             Times.Never);
     }
 
@@ -294,9 +294,9 @@ public class TrackAttributeGenericTests
         });
 
         SetupServiceProvider();
-        _requestFilterMock.Setup(x => x.RequestValid(_httpContext, It.IsAny<ImmutableGlobalOptions>()))
+        _requestFilterMock.Setup(x => x.ValidRequest(_httpContext, It.IsAny<ImmutableGlobalOptions>()))
             .Returns(true);
-        _requestHandlerMock.Setup(x => x.IsNotModified(_httpContext, It.IsAny<ImmutableGlobalOptions>(), default))
+        _requestHandlerMock.Setup(x => x.HandleRequest(_httpContext, It.IsAny<ImmutableGlobalOptions>(), default))
             .ReturnsAsync(false);
 
         // Act
@@ -304,7 +304,7 @@ public class TrackAttributeGenericTests
 
         // Assert
         Assert.True(nextCalled);
-        _requestHandlerMock.Verify(x => x.IsNotModified(_httpContext, It.IsAny<ImmutableGlobalOptions>(), default), Times.Once);
+        _requestHandlerMock.Verify(x => x.HandleRequest(_httpContext, It.IsAny<ImmutableGlobalOptions>(), default), Times.Once);
     }
 
 

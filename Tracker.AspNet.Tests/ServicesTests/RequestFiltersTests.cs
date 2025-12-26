@@ -28,7 +28,7 @@ public class DefaultRequestFilterTests
         var options = new ImmutableGlobalOptions();
 
         // Act
-        var result = _filter.RequestValid(_httpContext, options);
+        var result = _filter.ValidRequest(_httpContext, options);
 
         // Assert
         Assert.True(result);
@@ -46,7 +46,7 @@ public class DefaultRequestFilterTests
         var options = new ImmutableGlobalOptions();
 
         // Act
-        var result = _filter.RequestValid(_httpContext, options);
+        var result = _filter.ValidRequest(_httpContext, options);
 
         // Assert
         Assert.False(result);
@@ -61,7 +61,7 @@ public class DefaultRequestFilterTests
         var options = new ImmutableGlobalOptions();
 
         // Act
-        var result = _filter.RequestValid(_httpContext, options);
+        var result = _filter.ValidRequest(_httpContext, options);
 
         // Assert
         Assert.False(result);
@@ -81,7 +81,7 @@ public class DefaultRequestFilterTests
         var options = new ImmutableGlobalOptions();
 
         // Act
-        var result = _filter.RequestValid(_httpContext, options);
+        var result = _filter.ValidRequest(_httpContext, options);
 
         // Assert
         Assert.False(result);
@@ -101,7 +101,7 @@ public class DefaultRequestFilterTests
         var options = new ImmutableGlobalOptions();
 
         // Act
-        var result = _filter.RequestValid(_httpContext, options);
+        var result = _filter.ValidRequest(_httpContext, options);
 
         // Assert
         Assert.False(result);
@@ -118,7 +118,7 @@ public class DefaultRequestFilterTests
         var options = new ImmutableGlobalOptions();
 
         // Act
-        var result = _filter.RequestValid(_httpContext, options);
+        var result = _filter.ValidRequest(_httpContext, options);
 
         // Assert
         Assert.False(result);
@@ -144,7 +144,7 @@ public class DefaultRequestFilterTests
         var options = new ImmutableGlobalOptions();
 
         // Act
-        var result = _filter.RequestValid(_httpContext, options);
+        var result = _filter.ValidRequest(_httpContext, options);
 
         // Assert
         Assert.True(result);
@@ -161,7 +161,7 @@ public class DefaultRequestFilterTests
         };
 
         // Act
-        var result = _filter.RequestValid(_httpContext, options);
+        var result = _filter.ValidRequest(_httpContext, options);
 
         // Assert
         Assert.False(result);
@@ -177,7 +177,7 @@ public class DefaultRequestFilterTests
         var options = new ImmutableGlobalOptions();
 
         // Act
-        var result = _filter.RequestValid(_httpContext, options);
+        var result = _filter.ValidRequest(_httpContext, options);
 
         // Assert
         Assert.False(result);
@@ -193,7 +193,7 @@ public class DefaultRequestFilterTests
         var options = new ImmutableGlobalOptions();
 
         // Act
-        var result = _filter.RequestValid(_httpContext, options);
+        var result = _filter.ValidRequest(_httpContext, options);
 
         // Assert
         Assert.True(result);

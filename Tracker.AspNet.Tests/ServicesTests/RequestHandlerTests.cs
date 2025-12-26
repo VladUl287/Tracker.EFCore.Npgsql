@@ -39,7 +39,7 @@ public class RequestHandlerTests
 
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentNullException>(async () =>
-            await _handler.IsNotModified(null, options, CancellationToken.None));
+            await _handler.HandleRequest(null, options, CancellationToken.None));
     }
 
     [Fact]
@@ -50,7 +50,7 @@ public class RequestHandlerTests
 
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentNullException>(async () =>
-            await _handler.IsNotModified(context, null, CancellationToken.None));
+            await _handler.HandleRequest(context, null, CancellationToken.None));
     }
 
     private delegate bool TryResolveDelegate(string sourceId, out ISourceProvider? sourceOperations);
@@ -87,7 +87,7 @@ public class RequestHandlerTests
             .Returns(true);
 
         // Act
-        var result = await _handler.IsNotModified(context, options, CancellationToken.None);
+        var result = await _handler.HandleRequest(context, options, CancellationToken.None);
 
         // Assert
         Assert.True(result);
@@ -121,7 +121,7 @@ public class RequestHandlerTests
             .Returns(newEtag);
 
         // Act
-        var result = await _handler.IsNotModified(context, options, CancellationToken.None);
+        var result = await _handler.HandleRequest(context, options, CancellationToken.None);
 
         // Assert
         Assert.False(result);

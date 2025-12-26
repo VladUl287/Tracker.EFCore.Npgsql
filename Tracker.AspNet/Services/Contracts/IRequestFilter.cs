@@ -18,5 +18,5 @@ public interface IRequestFilter
     /// <returns>
     /// <c>true</c> if the provided context matches the expected validation rules; otherwise, <c>false</c>.
     /// </returns>
-    bool RequestValid(HttpContext context, ImmutableGlobalOptions options);
+    bool ValidRequest(HttpContext context, ImmutableGlobalOptions options);
 }
