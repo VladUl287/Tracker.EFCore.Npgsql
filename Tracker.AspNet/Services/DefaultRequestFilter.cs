@@ -51,7 +51,7 @@ public sealed class DefaultRequestFilter(ILogger<DefaultRequestFilter> logger) :
         return true;
     }
 
-    private static bool AnyInvalidDirective(StringValues headers, ImmutableArray<string> invalidDirectives, [NotNullWhen(true)] out string? directive)
+    internal static bool AnyInvalidDirective(StringValues headers, ImmutableArray<string> invalidDirectives, [NotNullWhen(true)] out string? directive)
     {
         directive = null;
 
