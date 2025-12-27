@@ -134,12 +134,14 @@ public class DefaultProviderResolverTests
         // Arrange
         var options = new ImmutableGlobalOptions();
         var expectedProvider = Mock.Of<ISourceProvider>();
+        var secondProvider = Mock.Of<ISourceProvider>();
         var serviceProviderMock = new Mock<IServiceProvider>();
         var httpContextMock = new Mock<HttpContext>();
 
         serviceProviderMock
-            .Setup(sp => sp.GetService(typeof(ISourceProvider)))
-            .Returns(expectedProvider);
+            .As<IKeyedServiceProvider>()
+            .Setup(sp => sp.GetRequiredKeyedService(typeof(IEnumerable<ISourceProvider>), It.IsAny<object>()))
+            .Returns(new ISourceProvider[] { expectedProvider, secondProvider }.AsEnumerable());
 
         httpContextMock.Setup(ctx => ctx.RequestServices)
             .Returns(serviceProviderMock.Object);
